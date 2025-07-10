@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:khelset/services/auth_service.dart';
+import '../services/auth_service.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
 
@@ -12,14 +12,18 @@ class AuthGate extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: AuthService().authStateChanges,
       builder: (context, snapshot) {
-        // User is logged in
+        // Show a loading spinner while waiting for the auth state
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        // If the user is logged in, show the HomeScreen
         if (snapshot.hasData) {
           return const HomeScreen();
         }
-        // User is not logged in
-        else {
-          return const LoginScreen();
-        }
+
+        // If the user is not logged in, show the LoginScreen
+        return const LoginScreen();
       },
     );
   }

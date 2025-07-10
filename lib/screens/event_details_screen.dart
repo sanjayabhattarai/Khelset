@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'login_screen.dart';
 
 // Theme colors
 const Color backgroundColor = Color(0xff121212);
@@ -73,12 +75,12 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> with SingleTick
             children: [
               // Content for the "Info" tab
               _buildInfoTab(eventData),
-              // Placeholder for the "Teams" tab
-              const Center(child: Text("Registered Teams will be shown here.", style: TextStyle(color: fontColor))),
+              // Use the new method to build the Teams tab
+              _buildTeamsTab(widget.eventId),
               // Placeholder for the "Schedule" tab
-              const Center(child: Text("Match Schedule will be shown here.", style: TextStyle(color: fontColor))),
+              _buildScheduleTab(widget.eventId),
             ],
-          );
+          );  
         },
       ),
     );
@@ -111,13 +113,121 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> with SingleTick
             "Rules & Requirements",
             style: TextStyle(color: fontColor, fontSize: 20, fontWeight: FontWeight.bold),
           ),
+
+          const SizedBox(height: 30),
+ElevatedButton(
+  style: ElevatedButton.styleFrom(
+    backgroundColor: primaryColor,
+    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+  ),
+  onPressed: () {
+    // THIS IS THE KEY LOGIC
+    if (FirebaseAuth.instance.currentUser == null) {
+      // If no user is logged in, navigate to the LoginScreen
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    } else {
+      // If user is logged in, proceed to Team Registration
+      // TODO: Create and navigate to TeamRegistrationScreen
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Already logged in! Ready to register.")),
+      );
+    }
+  },
+  child: const Text("Register Your Team"),
+),
           const SizedBox(height: 10),
           const Text(
             "Details about registration fees, rules, and required documents will be displayed here.",
             style: TextStyle(color: Colors.grey, fontSize: 16),
           ),
+          
         ],
       ),
     );
   }
+
+// A helper widget to build the content for the "Teams" tab
+  Widget _buildTeamsTab(String eventId) {
+    return StreamBuilder<QuerySnapshot>(
+      // This stream now listens to the 'teams' subcollection of your event
+      stream: FirebaseFirestore.instance
+          .collection('events')
+          .doc(eventId)
+          .collection('teams')
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return const Center(child: Text("Something went wrong"));
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(child: Text("No teams have registered yet.", style: TextStyle(color: fontColor)));
+        }
+
+        final teams = snapshot.data!.docs;
+
+        return ListView.builder(
+          itemCount: teams.length,
+          itemBuilder: (context, index) {
+            final teamData = teams[index].data() as Map<String, dynamic>;
+            final teamName = teamData['teamName'] ?? 'No Name';
+            final status = teamData['status'] ?? 'Pending';
+
+            return ListTile(
+              leading: const Icon(Icons.group, color: primaryColor),
+              title: Text(teamName, style: const TextStyle(color: fontColor)),
+              subtitle: Text("Status: $status", style: const TextStyle(color: Colors.grey)),
+            );
+          },
+        );
+      },
+    );
+  }
+// A helper widget to build the content for the "Schedule" tab
+  Widget _buildScheduleTab(String eventId) {
+    return StreamBuilder<QuerySnapshot>(
+      // This stream listens to the 'schedule' subcollection and orders it by time
+      stream: FirebaseFirestore.instance
+          .collection('events')
+          .doc(eventId)
+          .collection('schedule')
+          .orderBy('matchTime')
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return const Center(child: Text("Something went wrong"));
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(child: Text("Schedule has not been posted yet.", style: TextStyle(color: fontColor)));
+        }
+
+        final matches = snapshot.data!.docs;
+
+        return ListView.builder(
+          itemCount: matches.length,
+          itemBuilder: (context, index) {
+            final matchData = matches[index].data() as Map<String, dynamic>;
+            final teamA = matchData['teamA'] ?? 'Team A';
+            final teamB = matchData['teamB'] ?? 'Team B';
+            final status = matchData['status'] ?? 'TBD';
+
+            return ListTile(
+              leading: const Icon(Icons.sports_cricket, color: primaryColor),
+              title: Text('$teamA vs $teamB', style: const TextStyle(color: fontColor, fontWeight: FontWeight.bold)),
+              subtitle: Text("Status: $status", style: const TextStyle(color: Colors.grey)),
+            );
+          },
+        );
+      },
+    );
+  }
+
 }
