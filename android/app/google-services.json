@@ -1,41 +1,34 @@
 {
   "project_info": {
-    "project_number": "412114553058",
-    "project_id": "khelset-e8a8c",
-    "storage_bucket": "khelset-e8a8c.firebasestorage.app"
+    "project_number": "862681026576",
+    "project_id": "khelset-new",
+    "storage_bucket": "khelset-new.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:412114553058:android:4077fd0446628c5392b6bb",
+        "mobilesdk_app_id": "1:862681026576:android:3be9499b4c5bef091cba95",
         "android_client_info": {
-          "package_name": "com.example.firebase_test_app"
+          "package_name": "com.sanjay.khelset"
         }
       },
       "oauth_client": [
         {
-          "client_id": "412114553058-b19mlr3t6v1il46vo196kh7u44grtdql.apps.googleusercontent.com",
+          "client_id": "862681026576-1ri5274b1r8it0tqop027pptojcsj7fp.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDMuM2stCIE49Qd67ybq1hYCFO_2oNnAis"
+          "current_key": "AIzaSyBJYtRzO3mlfGy8-ntMzLAkPZy2USJwViQ"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "412114553058-b19mlr3t6v1il46vo196kh7u44grtdql.apps.googleusercontent.com",
+              "client_id": "862681026576-1ri5274b1r8it0tqop027pptojcsj7fp.apps.googleusercontent.com",
               "client_type": 3
-            },
-            {
-              "client_id": "412114553058-0udr05ilshnoqleghtqf3eenv1ft5ejc.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.khelset"
-              }
             }
           ]
         }
@@ -43,43 +36,36 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:412114553058:android:b2d3d7135b98792592b6bb",
+        "mobilesdk_app_id": "1:862681026576:android:14eba93db4e64fc41cba95",
         "android_client_info": {
-          "package_name": "com.sanjay.khelset"
+          "package_name": "com.sanjaya.khelset"
         }
       },
       "oauth_client": [
         {
-          "client_id": "412114553058-0hktrf850btf29ckj6m4h7mktrq0p0e5.apps.googleusercontent.com",
+          "client_id": "862681026576-45dvbf0qet3bbsd63heh3eu14sccgcl8.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.sanjay.khelset",
+            "package_name": "com.sanjaya.khelset",
             "certificate_hash": "0bd37e05d1ccfbded1a60c4f83f08ced67de833a"
           }
         },
         {
-          "client_id": "412114553058-b19mlr3t6v1il46vo196kh7u44grtdql.apps.googleusercontent.com",
+          "client_id": "862681026576-1ri5274b1r8it0tqop027pptojcsj7fp.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDMuM2stCIE49Qd67ybq1hYCFO_2oNnAis"
+          "current_key": "AIzaSyBJYtRzO3mlfGy8-ntMzLAkPZy2USJwViQ"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "412114553058-b19mlr3t6v1il46vo196kh7u44grtdql.apps.googleusercontent.com",
+              "client_id": "862681026576-1ri5274b1r8it0tqop027pptojcsj7fp.apps.googleusercontent.com",
               "client_type": 3
-            },
-            {
-              "client_id": "412114553058-0udr05ilshnoqleghtqf3eenv1ft5ejc.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.khelset"
-              }
             }
           ]
         }
