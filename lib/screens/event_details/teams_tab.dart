@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:khelset/theme/app_theme.dart';
+import 'package:khelset/screens/team_details_screen.dart'; // Import the details screen
 
 class TeamsTab extends StatelessWidget {
   final String eventId;
@@ -8,11 +9,7 @@ class TeamsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // This print statement helps us debug by showing the exact ID being used.
-    print("Querying teams for eventId: '$eventId'");
-
     return StreamBuilder<QuerySnapshot>(
-      // We use eventId directly here.
       stream: FirebaseFirestore.instance
           .collection('teams')
           .where('eventId', isEqualTo: eventId)
@@ -22,8 +19,7 @@ class TeamsTab extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          print("Firestore Error: ${snapshot.error}");
-          return const Center(child: Text("Something went wrong. Check debug console."));
+          return const Center(child: Text("Something went wrong."));
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return const Center(
@@ -43,10 +39,23 @@ class TeamsTab extends StatelessWidget {
             final teamName = teamData['name'] ?? 'No Name';
             final status = teamData['status'] ?? 'Pending';
 
+            // The ListTile is now tappable
             return ListTile(
               leading: const Icon(Icons.group, color: primaryColor),
               title: Text(teamName, style: const TextStyle(color: fontColor)),
               subtitle: Text("Status: $status", style: const TextStyle(color: subFontColor)),
+              // --- THIS IS THE NEW PART ---
+              onTap: () {
+                // When tapped, navigate to the TeamDetailsScreen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    // Pass the unique ID of the tapped team to the new screen
+                    builder: (context) => TeamDetailsScreen(teamId: teams[index].id),
+                  ),
+                );
+              },
+              // --- END OF NEW PART ---
             );
           },
         );
