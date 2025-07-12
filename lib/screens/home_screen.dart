@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:khelset/widgets/custom_app_bar.dart'; // <-- 1. ADD THIS IMPORT
 
 // Import the new, separate widget files
 import 'home/featured_events_carousel.dart';
@@ -7,6 +6,7 @@ import 'home/filter_chips.dart';
 import 'home/upcoming_events_list.dart';
 
 // Theme colors
+const Color primaryColor = Color(0xff1DB954);
 const Color backgroundColor = Color(0xff121212);
 const Color fontColor = Colors.white;
 
@@ -17,7 +17,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-      appBar: const CustomAppBar(), // <-- 2. USE THE NEW WIDGET HERE
+      appBar: _buildAppBar(),
       body: ListView(
         children: [
           _buildSectionTitle("Featured Events"),
@@ -31,7 +31,28 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // The old _buildAppBar method is now deleted from this file.
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: backgroundColor,
+      elevation: 0,
+      title: const Text("Khelset", style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold)),
+      centerTitle: false,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.search, color: fontColor),
+          onPressed: () {},
+        ),
+        IconButton(
+          icon: const Icon(Icons.notifications_outlined, color: fontColor),
+          onPressed: () {},
+        ),
+        IconButton(
+          icon: const Icon(Icons.account_circle_outlined, color: fontColor),
+          onPressed: () {},
+        ),
+      ],
+    );
+  }
 
   Widget _buildSectionTitle(String title) {
     return Padding(

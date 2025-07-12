@@ -1,128 +1,329 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import '../event_details_screen.dart'; // Import for navigation
+import '../event_details_screen.dart';
 
-// Re-define theme colors here or move them to a central theme file
+// Theme Constants
 const Color primaryColor = Color(0xff1DB954);
-const Color cardBackgroundColor = Color(0xff1E1E1E);
+const Color backgroundColor = Color(0xff121212);
+const Color cardColor = Color(0xff1E1E1E);
 const Color fontColor = Colors.white;
-const Color subFontColor = Colors.grey;
+const Color subFontColor = Color(0xFFB3B3B3);
+const Color liveBadgeColor = Color(0xFFE53935);
 
 class UpcomingEventsList extends StatelessWidget {
   const UpcomingEventsList({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('events').orderBy('date').snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Center(child: Text("Error: ${snapshot.error}", style: TextStyle(color: Colors.red)));
-        }
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(child: Text("No upcoming events found.", style: TextStyle(color: subFontColor)));
-        }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Text(
+            'Upcoming Events',
+            style: TextStyle(
+              color: fontColor,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('events')
+              .orderBy('date')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24.0),
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                  ),
+                ),
+              );
+            }
 
-        final events = snapshot.data!.docs;
+            if (snapshot.hasError) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                      const SizedBox(height: 16),
+                      Text(
+                        "Failed to load events",
+                        style: TextStyle(
+                          color: Colors.red[300],
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Please check your connection",
+                        style: TextStyle(
+                          color: subFontColor,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
 
-        // Using shrinkWrap and physics for nested lists
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: events.length,
-          itemBuilder: (context, index) {
-            final eventDoc = events[index];
-            final eventData = eventDoc.data() as Map<String, dynamic>;
-            eventData['documentID'] = eventDoc.id;
-            return EventCard(eventData: eventData);
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.event_available,
+                        color: subFontColor,
+                        size: 48,
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        "No upcoming events",
+                        style: TextStyle(
+                          color: fontColor,
+                          fontSize: 18,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Check back later for new events",
+                        style: TextStyle(
+                          color: subFontColor,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            final events = snapshot.data!.docs;
+
+            return ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: events.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final eventDoc = events[index];
+                final eventData = eventDoc.data() as Map<String, dynamic>;
+                eventData['documentID'] = eventDoc.id;
+                return EventCard(eventData: eventData);
+              },
+            );
           },
-        );
-      },
+        ),
+      ],
     );
   }
 }
 
-// We moved the EventCard widget here as well, as it's part of this list.
 class EventCard extends StatelessWidget {
   final Map<String, dynamic> eventData;
   const EventCard({super.key, required this.eventData});
 
   IconData _getSportIcon(String sportType) {
     switch (sportType.toLowerCase()) {
-      case 'cricket': return Icons.sports_cricket;
-      case 'football': return Icons.sports_soccer;
-      case 'futsal': return Icons.sports_soccer;
-      case 'basketball': return Icons.sports_basketball;
-      default: return Icons.sports;
+      case 'cricket':
+        return Icons.sports_cricket;
+      case 'football':
+        return Icons.sports_soccer;
+      case 'futsal':
+        return Icons.sports_soccer;
+      case 'basketball':
+        return Icons.sports_basketball;
+      case 'volleyball':
+        return Icons.sports_volleyball;
+      default:
+        return Icons.sports;
+    }
+  }
+
+  Color _getSportColor(String sportType) {
+    switch (sportType.toLowerCase()) {
+      case 'cricket':
+        return const Color(0xFF4CAF50);
+      case 'football':
+        return const Color(0xFF2196F3);
+      case 'basketball':
+        return const Color(0xFFFF9800);
+      default:
+        return primaryColor;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final eventName = eventData['eventName'] ?? 'Unnamed Event';
-    final location = eventData['location'] ?? 'No location';
+    final location = eventData['location'] ?? 'Location not specified';
     final sportType = eventData['sportType'] ?? 'General';
     final isLive = eventData['isLive'] ?? false;
     final eventId = eventData['documentID'] as String?;
+    final participants = eventData['participants'] ?? 0;
 
     String formattedDate = 'Date not set';
+    String formattedTime = '';
     if (eventData['date'] != null && eventData['date'] is Timestamp) {
-      final timestamp = eventData['date'] as Timestamp;
-      formattedDate = DateFormat('MMM d, yyyy').format(timestamp.toDate());
+      final date = (eventData['date'] as Timestamp).toDate();
+      formattedDate = DateFormat('EEE, MMM d').format(date);
+      formattedTime = DateFormat('h:mm a').format(date);
     }
 
     return Card(
-      color: cardBackgroundColor,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      
-   child: InkWell(
+      elevation: 2,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      color: cardColor,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
         onTap: () {
           if (eventId != null) {
-            // This will print the ID of the card you tapped
-            print("Tapped Event with ID: '$eventId'");
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => EventDetailsScreen(eventId: eventId)),
+              MaterialPageRoute(
+                builder: (context) => EventDetailsScreen(eventId: eventId),
+              ),
             );
           }
         },
-
-
-        borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              Icon(_getSportIcon(sportType), color: primaryColor, size: 40),
+              // Sport Icon with colored background
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: _getSportColor(sportType).withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  _getSportIcon(sportType),
+                  color: _getSportColor(sportType),
+                  size: 28,
+                ),
+              ),
               const SizedBox(width: 16),
+
+              // Event Details
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(eventName, style: const TextStyle(color: fontColor, fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 4),
-                    Text(formattedDate, style: const TextStyle(color: subFontColor, fontSize: 14)),
-                    const SizedBox(height: 4),
-                    Row(children: [
-                      const Icon(Icons.location_on_outlined, color: subFontColor, size: 16),
-                      const SizedBox(width: 4),
-                      Text(location, style: const TextStyle(color: subFontColor, fontSize: 14)),
-                    ]),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            eventName,
+                            style: const TextStyle(
+                              color: fontColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (isLive)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: liveBadgeColor,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              'LIVE',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today,
+                          color: subFontColor,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '$formattedDate • $formattedTime',
+                          style: TextStyle(
+                            color: subFontColor,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.location_on_outlined,
+                          color: subFontColor,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            location,
+                            style: TextStyle(
+                              color: subFontColor,
+                              fontSize: 13,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.people_outline,
+                          color: subFontColor,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '$participants ${participants == 1 ? 'participant' : 'participants'}',
+                          style: TextStyle(
+                            color: subFontColor,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
-              if (isLive)
-                Chip(
-                  label: const Text('LIVE'),
-                  backgroundColor: Colors.red,
-                  labelStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                ),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.chevron_right,
+                color: subFontColor,
+              ),
             ],
           ),
         ),
