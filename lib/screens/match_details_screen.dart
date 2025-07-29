@@ -131,7 +131,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
                     children: [
                       // Pass all the necessary data down to each tab
                       ScorecardTab(matchData: matchData, allPlayers: allPlayers),
-                      LiveTab(matchData: matchData, allPlayers: allPlayers),
+                      LiveTab(matchData: matchData, allPlayers: allPlayers , matchId: widget.matchId),
                       SquadsTab(
                         allPlayers: allPlayers,
                         teamAId: matchData['teamA_id'],

@@ -9,14 +9,16 @@ import 'commentary_section.dart'; // We assume this file has the redesigned comm
 // which is much more efficient.
 //==============================================================================
 class LiveTab extends StatelessWidget {
-  // It requires 'matchData' and 'allPlayers' passed down from MatchDetailsScreen
+  // It requires 'matchData', 'allPlayers', and 'matchId' passed down from MatchDetailsScreen
   final Map<String, dynamic> matchData;
   final List<Map<String, dynamic>> allPlayers;
+  final String matchId;
 
   const LiveTab({
     super.key,
     required this.matchData,
     required this.allPlayers,
+    required this.matchId,
   });
 
   @override
@@ -31,8 +33,8 @@ class LiveTab extends StatelessWidget {
         _PlayerStatsCard(matchData: matchData),
         const SizedBox(height: 16),
         CommentarySection(
-          matchData: matchData,
           allPlayers: allPlayers,
+          matchId: matchId,
         ),
       ],
     );

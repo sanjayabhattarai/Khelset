@@ -1,270 +1,212 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:khelset/theme/app_theme.dart';
 
 class CommentarySection extends StatelessWidget {
-  final Map<String, dynamic> matchData;
+  // It now needs the matchId to build the path to the subcollection
+  final String matchId;
   final List<Map<String, dynamic>> allPlayers;
 
   const CommentarySection({
     super.key,
-    required this.matchData,
+    required this.matchId,
     required this.allPlayers,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Get delivery history from both innings
-    final innings1History = List<Map<String, dynamic>>.from(
-      matchData['innings1_deliveryHistory'] ?? []
-    );
-    final innings2History = List<Map<String, dynamic>>.from(
-      matchData['innings2_deliveryHistory'] ?? []
-    );
+    // Create streams that listen to the delivery history subcollections
+    final innings1Stream = FirebaseFirestore.instance
+        .collection('matches').doc(matchId).collection('innings1_deliveryHistory')
+        .orderBy('ballId', descending: true) // Get newest first
+        .snapshots();
 
-    if (innings1History.isEmpty && innings2History.isEmpty) {
-      return const Center(
-        child: Text("Commentary will appear here.", 
-          style: TextStyle(color: subFontColor)),
-      );
-    }
+    final innings2Stream = FirebaseFirestore.instance
+        .collection('matches').doc(matchId).collection('innings2_deliveryHistory')
+        .orderBy('ballId', descending: true)
+        .snapshots();
 
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('COMMENTARY',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF2D5A80),
-              ),
-            ),
+            Text('COMMENTARY', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: primaryColor)),
             const SizedBox(height: 12),
-            
-            // Show 2nd innings first (reverse chronological order)
-            if (innings2History.isNotEmpty) ...[
-              _InningsHeader(inningsNumber: 2),
-              ..._buildInningsCommentary(innings2History),
-              const SizedBox(height: 24),
-            ],
-            
-            // Then show 1st innings
-            if (innings1History.isNotEmpty) ...[
-              _InningsHeader(inningsNumber: 1),
-              ..._buildInningsCommentary(innings1History),
-            ],
+            // We use two StreamBuilders, one for each innings, to show the full history
+            StreamBuilder<QuerySnapshot>(
+              stream: innings2Stream,
+              builder: (context, innings2Snapshot) {
+                return StreamBuilder<QuerySnapshot>(
+                  stream: innings1Stream,
+                  builder: (context, innings1Snapshot) {
+                    if (!innings1Snapshot.hasData && !innings2Snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final innings1Docs = innings1Snapshot.data?.docs ?? [];
+                    final innings2Docs = innings2Snapshot.data?.docs ?? [];
+
+                    if (innings1Docs.isEmpty && innings2Docs.isEmpty) {
+                      return const Center(child: Text("Commentary will appear here.", style: TextStyle(color: subFontColor)));
+                    }
+
+                    // We simply build the list for each innings
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (innings2Docs.isNotEmpty)
+                          _buildInningsCommentary(context, 'INNINGS 2', innings2Docs),
+                        if (innings1Docs.isNotEmpty)
+                          _buildInningsCommentary(context, 'INNINGS 1', innings1Docs),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
           ],
         ),
       ),
     );
   }
 
-  List<Widget> _buildInningsCommentary(List<Map<String, dynamic>> deliveries) {
-    List<Widget> commentaryWidgets = [];
-    Map<int, List<Map<String, dynamic>>> overMap = {};
-
-    // Group deliveries by over
-    for (final delivery in deliveries) {
-      final over = (delivery['overNumber'] as num?)?.toInt() ?? 0;
-      overMap.putIfAbsent(over, () => []).add(delivery);
-    }
-
-    // Sort overs in descending order (newest first)
-    final sortedOvers = overMap.entries.toList()
-      ..sort((a, b) => b.key.compareTo(a.key));
-
-    for (var overEntry in sortedOvers) {
-      final overNumber = overEntry.key;
-      final deliveriesInOver = overEntry.value;
-      
-      // Sort balls within each over (newest first)
-      deliveriesInOver.sort((a, b) => 
-        ((b['ballInOver'] as num?)?.toInt() ?? 0)
-        .compareTo((a['ballInOver'] as num?)?.toInt() ?? 0)
-      );
-
-      // Add commentary items
-      for (var delivery in deliveriesInOver) {
-        commentaryWidgets.add(_CommentaryItem(
-          deliveryData: delivery,
-          allPlayers: allPlayers,
-        ));
-        commentaryWidgets.add(const SizedBox(height: 8));
-      }
-
-      // Add over summary
-      commentaryWidgets.add(_OverSummary(
-        overNumber: overNumber,
-        deliveries: deliveriesInOver,
-      ));
-      commentaryWidgets.add(const SizedBox(height: 16));
-    }
-
-    return commentaryWidgets;
-  }
-}
-
-class _InningsHeader extends StatelessWidget {
-  final int inningsNumber;
-  
-  const _InningsHeader({required this.inningsNumber});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Text(
-        'INNINGS $inningsNumber',
-        style: const TextStyle(
-          color: primaryColor,
-          fontSize: 14,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.2,
-        ),
-      ),
-    );
-  }
-}
-
-class _OverSummary extends StatelessWidget {
-  final int overNumber;
-  final List<Map<String, dynamic>> deliveries;
-
-  const _OverSummary({required this.overNumber, required this.deliveries});
-
-  @override
-  Widget build(BuildContext context) {
-    final runsThisOver = deliveries.fold<num>(0, (sum, d) => 
-      sum + ((d['runsScored'] as Map<String, dynamic>?)?['total'] ?? 0)
-    );
-
-    final overSummary = deliveries.reversed.map((d) {
-      final total = (d['runsScored'] as Map<String, dynamic>?)?['total'] ?? 0;
-      final isWicket = d['isWicket'] ?? false;
-      if (isWicket) return "W";
-      if (total == 0) return "•";
-      return total.toString();
-    }).join(" ");
-
+  Widget _buildInningsCommentary(BuildContext context, String title, List<QueryDocumentSnapshot> docs) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("End of Over $overNumber: $runsThisOver runs", 
-          style: const TextStyle(
-            color: fontColor, 
-            fontWeight: FontWeight.bold
-          ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: fontColor)),
         ),
-        Text(overSummary, 
-          style: const TextStyle(
-            color: subFontColor, 
-            fontSize: 16, 
-            letterSpacing: 2.0
-          ),
+        ListView.separated(
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: docs.length,
+          itemBuilder: (context, index) {
+            final deliveryData = docs[index].data() as Map<String, dynamic>;
+            return _CommentaryItem(deliveryData: deliveryData, allPlayers: allPlayers);
+          },
+          separatorBuilder: (context, index) => const Divider(),
         ),
+        const SizedBox(height: 16),
       ],
     );
   }
 }
 
+
+//==============================================================================
+// COMMENTARY ITEM WIDGET
+// This widget now contains the logic to generate the commentary text itself.
+//==============================================================================
 class _CommentaryItem extends StatelessWidget {
   final Map<String, dynamic> deliveryData;
   final List<Map<String, dynamic>> allPlayers;
 
-  const _CommentaryItem({
-    required this.deliveryData,
-    required this.allPlayers,
-  });
+  const _CommentaryItem({required this.deliveryData, required this.allPlayers});
 
+  // --- LOGIC MOVED FROM SERVICE INTO THE WIDGET ---
+
+  // A helper to get a player's name from an ID
   String _getPlayerName(String? playerId) {
     if (playerId == null) return 'Unknown';
-    final player = allPlayers.firstWhere(
-      (p) => p['id'] == playerId, 
-      orElse: () => {'name': 'Unknown'}
-    );
-    return player['name'];
+    return allPlayers.firstWhere((p) => p['id'] == playerId, orElse: () => {'name': 'Unknown'})['name'];
   }
 
+  // The main function that generates the commentary text
   String _generateCommentaryText() {
-    final batsmanName = _getPlayerName(deliveryData['batsmanId']);
     final bowlerName = _getPlayerName(deliveryData['bowlerId']);
-    final runs = (deliveryData['runsScored'] as Map<String, dynamic>?)?['batsman'] ?? 0;
+    final batsmanName = _getPlayerName(deliveryData['batsmanId']);
+    final runs = (deliveryData['runsScored'] as Map?)?['batsman'] ?? 0;
     final extraType = deliveryData['extraType'];
     final isWicket = deliveryData['isWicket'] ?? false;
     final wicketInfo = deliveryData['wicketInfo'] as Map<String, dynamic>?;
 
     String commentary = "$bowlerName to $batsmanName, ";
 
-    if (isWicket) {
-      if (wicketInfo != null) {
-        final wicketType = wicketInfo['type'] ?? 'out';
-        final dismissedBatsmanName = _getPlayerName(wicketInfo['batsmanId']);
-        return "$commentary WICKET! $dismissedBatsmanName is out ($wicketType)";
+    if (isWicket && wicketInfo != null) {
+      final wicketType = (wicketInfo['type'] ?? 'out').toString().replaceAll('_', ' ');
+      final dismissedBatsman = _getPlayerName(wicketInfo['batsmanId']);
+      if (wicketInfo['fielderId'] != null) {
+        final fielderName = _getPlayerName(wicketInfo['fielderId']);
+        return "$commentary WICKET! $dismissedBatsman is out, $wicketType by $fielderName!";
       }
-      return "$commentary WICKET!";
+      return "$commentary WICKET! $dismissedBatsman is out, $wicketType!";
     }
-    
+
     if (extraType != null) {
-      final totalRuns = (deliveryData['runsScored'] as Map<String, dynamic>?)?['total'] ?? 0;
-      switch (extraType) {
-        case 'wide': return "$commentary $totalRuns wide(s).";
-        case 'no_ball': return "$commentary $totalRuns run(s) from a No Ball!";
-        case 'bye': return "$commentary $totalRuns bye(s).";
-        case 'leg_bye': return "$commentary $totalRuns leg bye(s).";
-      }
+      final totalRuns = (deliveryData['runsScored'] as Map?)?['total'] ?? 0;
+      return "$commentary $totalRuns run(s) from a ${extraType.toString().replaceAll('_', ' ')}.";
     }
 
     switch (runs) {
       case 0: return "$commentary no run.";
       case 1: return "$commentary 1 run.";
-      case 4: return "$commentary FOUR!";
-      case 6: return "$commentary SIX!";
+      case 4: return "$commentary FOUR! Great shot!";
+      case 6: return "$commentary SIX! Massive hit!";
       default: return "$commentary $runs runs.";
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final over = (deliveryData['overNumber'] as num?)?.toInt() ?? 0;
-    final ballInOver = (deliveryData['ballInOver'] as num?)?.toInt() ?? 0;
-    final commentaryText = _generateCommentaryText();
+    // --- Data Extraction for UI ---
+    final over = deliveryData['overNumber'] as int? ?? 0;
+    final ballInOver = deliveryData['ballInOver'] as int? ?? 0;
+    final totalRuns = (deliveryData['runsScored'] as Map?)?['total'] ?? 0;
     final isWicket = deliveryData['isWicket'] ?? false;
-    final totalRuns = (deliveryData['runsScored'] as Map<String, dynamic>?)?['total'] ?? 0;
+    
+    // Call the local helper method to generate the text
+    final commentaryText = _generateCommentaryText();
+    
+    // --- UI Styling ---
+    Color circleColor = subFontColor;
+    String circleText = totalRuns.toString();
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CircleAvatar(
-          radius: 18,
-          backgroundColor: isWicket ? Colors.red.shade700 : primaryColor,
-          child: Text(
-            isWicket ? 'W' : totalRuns.toString(),
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+    if (isWicket) {
+      circleColor = Colors.red.shade700;
+      circleText = 'W';
+    } else if (totalRuns == 4) {
+      circleColor = Colors.blue.shade700;
+    } else if (totalRuns == 6) {
+      circleColor = Colors.purple.shade700;
+    } else if (totalRuns == 0 && (deliveryData['extraType'] == null)) {
+      circleText = '•'; // A dot for a dot ball
+    }
+    
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            radius: 16,
+            backgroundColor: circleColor,
+            child: Text(
+              circleText,
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+            ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "$over.$ballInOver",
-                style: const TextStyle(color: subFontColor, fontSize: 14),
-              ),
-              Text(
-                commentaryText,
-                style: const TextStyle(color: fontColor, fontSize: 16),
-              ),
-            ],
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("$over.$ballInOver", style: Theme.of(context).textTheme.bodyMedium),
+                Text(
+                  commentaryText, 
+                  style: isWicket 
+                    ? Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold) 
+                    : Theme.of(context).textTheme.bodyLarge,
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
