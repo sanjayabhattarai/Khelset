@@ -72,7 +72,7 @@ class ScorecardTab extends StatelessWidget {
 //==============================================================================
 class _MatchSummaryCard extends StatelessWidget {
   final Map<String, dynamic> matchData;
-  const _MatchSummaryCard({super.key, required this.matchData});
+  const _MatchSummaryCard({required this.matchData});
 
   @override
   Widget build(BuildContext context) {

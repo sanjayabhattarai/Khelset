@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:khelset/screens/login_screen.dart';
 import 'package:khelset/screens/profile_screen.dart';
 
 // Theme colors
