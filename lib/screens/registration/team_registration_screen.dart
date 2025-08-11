@@ -64,18 +64,38 @@ class _TeamRegistrationScreenState extends State<TeamRegistrationScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await FirebaseFirestore.instance.collection('teams').add({
+      // Create the team document first
+      final teamDoc = await FirebaseFirestore.instance.collection('teams').add({
         'name': _teamNameController.text,
         'eventId': widget.eventId,
         'captainId': user.uid,
         'status': 'Pending',
         'createdAt': FieldValue.serverTimestamp(),
-        // Convert our list of Player objects to a list of Maps
-        'players': _players.map((player) => player.toMap()).toList(),
+        'playerIds': [], // Will be populated as players are created
+      });
+
+      // Create individual player documents and update team
+      final List<String> playerIds = [];
+      for (final player in _players) {
+        // Create player document
+        final playerDoc = await FirebaseFirestore.instance.collection('players').add({
+          'name': player.name,
+          'role': player.role,
+          'teamId': teamDoc.id,
+          'eventId': widget.eventId,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        
+        playerIds.add(playerDoc.id);
+      }
+
+      // Update team document with all player IDs
+      await teamDoc.update({
+        'playerIds': playerIds,
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Team registered successfully!")));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Team registered successfully with optimized structure!")));
         Navigator.pop(context);
       }
     } catch (e) {

@@ -42,11 +42,51 @@ class TeamsTab extends StatelessWidget {
             final teamData = teams[index].data() as Map<String, dynamic>;
             final teamName = teamData['name'] ?? 'No Name';
             final status = teamData['status'] ?? 'Pending';
+            final teamId = teams[index].id;
 
-            return ListTile(
+            return ExpansionTile(
               leading: const Icon(Icons.group, color: primaryColor),
               title: Text(teamName, style: const TextStyle(color: fontColor)),
               subtitle: Text("Status: $status", style: const TextStyle(color: subFontColor)),
+              children: [
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('players')
+                      .where('teamId', isEqualTo: teamId)
+                      .snapshots(),
+                  builder: (context, playerSnapshot) {
+                    if (playerSnapshot.connectionState == ConnectionState.waiting) {
+                      return const Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+                    
+                    if (!playerSnapshot.hasData || playerSnapshot.data!.docs.isEmpty) {
+                      return const Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Text("No players found", style: TextStyle(color: subFontColor)),
+                      );
+                    }
+
+                    final players = playerSnapshot.data!.docs;
+                    return Column(
+                      children: players.map((playerDoc) {
+                        final playerData = playerDoc.data() as Map<String, dynamic>;
+                        final playerName = playerData['name'] ?? 'Unknown';
+                        final playerRole = playerData['role'] ?? 'Unknown';
+                        
+                        return ListTile(
+                          leading: const Icon(Icons.person, color: primaryColor, size: 20),
+                          title: Text(playerName, style: const TextStyle(color: fontColor, fontSize: 14)),
+                          subtitle: Text(playerRole, style: const TextStyle(color: subFontColor, fontSize: 12)),
+                          dense: true,
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
+              ],
             );
           },
         );
