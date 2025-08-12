@@ -41,13 +41,13 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAIjyN6idJU_jtbjKWTwx21bNNtCk66ogc',
-    appId: '1:412114553058:web:33351422587acb9992b6bb',
-    messagingSenderId: '412114553058',
-    projectId: 'khelset-e8a8c',
-    authDomain: 'khelset-e8a8c.firebaseapp.com',
-    storageBucket: 'khelset-e8a8c.firebasestorage.app',
-    measurementId: 'G-1V6PVQME41',
+    apiKey: 'AIzaSyABT_iHwUob7fUOVmTFUYP7pJ5pDAJu6EA',
+    appId: '1:862681026576:web:1cbc6638e773d5641cba95',
+    messagingSenderId: '862681026576',
+    projectId: 'khelset-new',
+    authDomain: 'khelset-new.firebaseapp.com',
+    storageBucket: 'khelset-new.firebasestorage.app',
+    measurementId: 'G-XRH5NW1EM7',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -59,35 +59,35 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyA8N03a_-KqXoIwuButMnGDpWizQ8gyVM0',
-    appId: '1:412114553058:ios:474a2c2086fad9b992b6bb',
-    messagingSenderId: '412114553058',
-    projectId: 'khelset-e8a8c',
-    storageBucket: 'khelset-e8a8c.firebasestorage.app',
-    androidClientId: '412114553058-0hktrf850btf29ckj6m4h7mktrq0p0e5.apps.googleusercontent.com',
-    iosClientId: '412114553058-i119a8hem93giu3qq0cive18vudrc7qd.apps.googleusercontent.com',
+    apiKey: 'AIzaSyBJYtRzO3mlfGy8-ntMzLAkPZy2USJwViQ',
+    appId: '1:862681026576:ios:3be9499b4c5bef091cba95',
+    messagingSenderId: '862681026576',
+    projectId: 'khelset-new',
+    storageBucket: 'khelset-new.firebasestorage.app',
+    androidClientId: '862681026576-0hktrf850btf29ckj6m4h7mktrq0p0e5.apps.googleusercontent.com',
+    iosClientId: '862681026576-i119a8hem93giu3qq0cive18vudrc7qd.apps.googleusercontent.com',
     iosBundleId: 'com.example.firebaseTestApp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyA8N03a_-KqXoIwuButMnGDpWizQ8gyVM0',
-    appId: '1:412114553058:ios:474a2c2086fad9b992b6bb',
-    messagingSenderId: '412114553058',
-    projectId: 'khelset-e8a8c',
-    storageBucket: 'khelset-e8a8c.firebasestorage.app',
-    androidClientId: '412114553058-0hktrf850btf29ckj6m4h7mktrq0p0e5.apps.googleusercontent.com',
-    iosClientId: '412114553058-i119a8hem93giu3qq0cive18vudrc7qd.apps.googleusercontent.com',
+    apiKey: 'AIzaSyBJYtRzO3mlfGy8-ntMzLAkPZy2USJwViQ',
+    appId: '1:862681026576:ios:3be9499b4c5bef091cba95',
+    messagingSenderId: '862681026576',
+    projectId: 'khelset-new',
+    storageBucket: 'khelset-new.firebasestorage.app',
+    androidClientId: '862681026576-0hktrf850btf29ckj6m4h7mktrq0p0e5.apps.googleusercontent.com',
+    iosClientId: '862681026576-i119a8hem93giu3qq0cive18vudrc7qd.apps.googleusercontent.com',
     iosBundleId: 'com.example.firebaseTestApp',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyAIjyN6idJU_jtbjKWTwx21bNNtCk66ogc',
-    appId: '1:412114553058:web:2a4ea74be882e2f292b6bb',
-    messagingSenderId: '412114553058',
-    projectId: 'khelset-e8a8c',
-    authDomain: 'khelset-e8a8c.firebaseapp.com',
-    storageBucket: 'khelset-e8a8c.firebasestorage.app',
-    measurementId: 'G-H9SP43QX20',
+    apiKey: 'AIzaSyABT_iHwUob7fUOVmTFUYP7pJ5pDAJu6EA',
+    appId: '1:862681026576:web:1cbc6638e773d5641cba95',
+    messagingSenderId: '862681026576',
+    projectId: 'khelset-new',
+    authDomain: 'khelset-new.firebaseapp.com',
+    storageBucket: 'khelset-new.firebasestorage.app',
+    measurementId: 'G-XRH5NW1EM7',
   );
 
 }

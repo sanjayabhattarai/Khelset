@@ -24,10 +24,10 @@ service cloud.firestore {
     }
     
     // ==============================================================================
-    // TEAMS COLLECTION - FIXED FOR REGISTRATION
+    // TEAMS COLLECTION - FIXED FOR REGISTRATION AND WEB ACCESS
     // ==============================================================================
     match /teams/{teamId} {
-      // Anyone can read teams
+      // ✅ CRITICAL: Anyone can read teams (for both mobile and web)
       allow read: if true;
       
       // ✅ CRITICAL FIX: Allow authenticated users to create teams
