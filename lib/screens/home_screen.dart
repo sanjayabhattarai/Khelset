@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'home/featured_events_carousel.dart';
 import 'home/filter_chips.dart';
 import 'home/upcoming_events_list.dart';
+import 'profile_screen.dart';
 
 // Theme colors
 const Color primaryColor = Color(0xff1DB954);
@@ -17,7 +18,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-      appBar: _buildAppBar(),
+      appBar: _buildAppBar(context),
       body: ListView(
         children: [
           _buildSectionTitle("Featured Events"),
@@ -31,7 +32,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  AppBar _buildAppBar() {
+  AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       backgroundColor: backgroundColor,
       elevation: 0,
@@ -48,7 +49,11 @@ class HomeScreen extends StatelessWidget {
         ),
         IconButton(
           icon: const Icon(Icons.account_circle_outlined, color: fontColor),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+            );
+          },
         ),
       ],
     );

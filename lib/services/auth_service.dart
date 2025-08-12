@@ -1,6 +1,7 @@
 // lib/services/auth_service.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -53,11 +54,27 @@ class AuthService {
 
 // Add this method inside your AuthService class
 
-final GoogleSignIn _googleSignIn = GoogleSignIn();
+GoogleSignIn? _googleSignIn;
+
+GoogleSignIn get googleSignIn {
+  if (kIsWeb) {
+    // For web, use a web-specific client ID (you'll need to get this from Firebase Console)
+    _googleSignIn ??= GoogleSignIn(
+      clientId: '862681026576-web.apps.googleusercontent.com', // Replace with actual web client ID
+    );
+  } else {
+    // For mobile platforms, use the androidClientId from Firebase options
+    _googleSignIn ??= GoogleSignIn(
+      // Use the Android client ID from your Firebase options
+      clientId: '862681026576-0hktrf850btf29ckj6m4h7mktrq0p0e5.apps.googleusercontent.com',
+    );
+  }
+  return _googleSignIn!;
+}
 
 Future<User?> signInWithGoogle() async {
   try {
-    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+    final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
     if (googleUser == null) {
       // The user canceled the sign-in
       return null;
