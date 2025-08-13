@@ -30,7 +30,19 @@ class _TeamRegistrationScreenState extends State<TeamRegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _teamNameController = TextEditingController();
   final _playerNameController = TextEditingController();
-  final _playerRoleController = TextEditingController();
+  
+  // Player role options
+  final List<String> _playerRoleOptions = [
+    'Batsman',
+    'Bowler',
+    'All-rounder',
+    'Wicketkeeper',
+    'Captain',
+    'Coach',
+    'Team Manager',
+  ];
+  
+  String? _selectedRole;
 
   // This list will hold the players as the user adds them
   final List<Player> _players = [];
@@ -38,16 +50,20 @@ class _TeamRegistrationScreenState extends State<TeamRegistrationScreen> {
 
   // Function to add a player to our local list
   void _addPlayer() {
-    if (_playerNameController.text.isNotEmpty && _playerRoleController.text.isNotEmpty) {
+    if (_playerNameController.text.isNotEmpty && _selectedRole != null) {
       setState(() {
         _players.add(Player(
           name: _playerNameController.text,
-          role: _playerRoleController.text,
+          role: _selectedRole!,
         ));
         // Clear the text fields after adding
         _playerNameController.clear();
-        _playerRoleController.clear();
+        _selectedRole = null;
       });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter player name and select a role")),
+      );
     }
   }
 
@@ -133,7 +149,32 @@ class _TeamRegistrationScreenState extends State<TeamRegistrationScreen> {
                   const SizedBox(height: 10),
                   TextFormField(controller: _playerNameController, style: const TextStyle(color: fontColor), decoration: const InputDecoration(labelText: "Player Name", labelStyle: TextStyle(color: subFontColor))),
                   const SizedBox(height: 10),
-                  TextFormField(controller: _playerRoleController, style: const TextStyle(color: fontColor), decoration: const InputDecoration(labelText: "Player Role (e.g., Batsman)", labelStyle: TextStyle(color: subFontColor))),
+                  DropdownButtonFormField<String>(
+                    value: _selectedRole,
+                    style: const TextStyle(color: fontColor),
+                    decoration: const InputDecoration(
+                      labelText: "Player Role",
+                      labelStyle: TextStyle(color: subFontColor),
+                    ),
+                    dropdownColor: backgroundColor,
+                    items: _playerRoleOptions.map((String role) {
+                      return DropdownMenuItem<String>(
+                        value: role,
+                        child: Text(role, style: const TextStyle(color: fontColor)),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedRole = newValue;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null) {
+                        return 'Please select a player role';
+                      }
+                      return null;
+                    },
+                  ),
                   const SizedBox(height: 12),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(backgroundColor: subFontColor),

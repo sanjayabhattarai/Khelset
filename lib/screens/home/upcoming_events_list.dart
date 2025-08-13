@@ -48,6 +48,9 @@ class UpcomingEventsList extends StatelessWidget {
             }
 
             if (snapshot.hasError) {
+              // Print the error for debugging
+              print('Firestore error: ${snapshot.error}');
+              
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -64,11 +67,26 @@ class UpcomingEventsList extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        "Please check your connection",
+                        "Error: ${snapshot.error.toString()}",
                         style: TextStyle(
                           color: subFontColor,
-                          fontSize: 14,
+                          fontSize: 12,
                         ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Try to reload by calling setState indirectly
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => const UpcomingEventsList()),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                        ),
+                        child: const Text("Retry"),
                       ),
                     ],
                   ),
