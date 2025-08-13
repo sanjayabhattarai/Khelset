@@ -95,20 +95,34 @@ class _SearchScreenState extends State<SearchScreen> {
       // Search Events - This should work as events have read: if true
       if (_selectedFilter == 'All' || _selectedFilter == 'Events') {
         try {
+          print('Searching events for query: $query');
           final eventsSnapshot = await FirebaseFirestore.instance
               .collection('events')
               .limit(20)
               .get();
           
+          print('Found ${eventsSnapshot.docs.length} events in database');
+          
           for (var doc in eventsSnapshot.docs) {
             final data = doc.data();
-            final eventName = data['name'] ?? '';
-            final sport = data['sport'] ?? '';
-            final location = data['location'] ?? '';
+            print('Event data: $data');
             
-            if (eventName.toLowerCase().contains(query.toLowerCase()) ||
+            final eventName = data['name'] ?? data['eventName'] ?? '';
+            final sport = data['sport'] ?? data['category'] ?? '';
+            final location = data['location'] ?? data['venue'] ?? '';
+            final description = data['description'] ?? '';
+            
+            print('Event: $eventName, Sport: $sport, Location: $location');
+            
+            // More flexible search - check if query is empty or matches any field
+            bool matches = query.toLowerCase().isEmpty ||
+                eventName.toLowerCase().contains(query.toLowerCase()) ||
                 sport.toLowerCase().contains(query.toLowerCase()) ||
-                location.toLowerCase().contains(query.toLowerCase())) {
+                location.toLowerCase().contains(query.toLowerCase()) ||
+                description.toLowerCase().contains(query.toLowerCase());
+            
+            if (matches) {
+              print('Event matches query: $eventName');
               results.add({
                 'type': 'event',
                 'id': doc.id,
@@ -120,6 +134,7 @@ class _SearchScreenState extends State<SearchScreen> {
               });
             }
           }
+          print('Added ${results.where((r) => r['type'] == 'event').length} events to results');
         } catch (e) {
           print('Error searching events: $e');
         }
@@ -133,8 +148,10 @@ class _SearchScreenState extends State<SearchScreen> {
               .limit(50)
               .get();
           
-          Set<Map<String, dynamic>> uniquePlayers = {};
+          List<Map<String, dynamic>> matchingPlayers = [];
+          Set<String> teamIds = {};
           
+          // First pass: collect matching players and unique team IDs
           for (var doc in playersSnapshot.docs) {
             final playerData = doc.data();
             final playerName = playerData['name'] ?? '';
@@ -143,18 +160,59 @@ class _SearchScreenState extends State<SearchScreen> {
             
             if (playerName.toLowerCase().contains(query.toLowerCase()) ||
                 role.toLowerCase().contains(query.toLowerCase())) {
-              uniquePlayers.add({
-                'type': 'player',
+              
+              matchingPlayers.add({
                 'id': doc.id,
                 'data': playerData,
-                'title': playerName.isNotEmpty ? playerName : 'Unnamed Player',
-                'subtitle': '${role.isNotEmpty ? role : 'Player'} • Team ID: ${teamId.isNotEmpty ? teamId : 'Unknown'}',
-                'icon': Icons.person,
-                'color': Colors.green,
+                'name': playerName,
+                'role': role,
+                'teamId': teamId,
               });
               
-              if (uniquePlayers.length >= 20) break;
+              if (teamId.isNotEmpty) {
+                teamIds.add(teamId);
+              }
+              
+              if (matchingPlayers.length >= 20) break;
             }
+          }
+          
+          // Batch fetch team names
+          Map<String, String> teamNames = {};
+          if (teamIds.isNotEmpty) {
+            try {
+              for (String teamId in teamIds) {
+                final teamDoc = await FirebaseFirestore.instance
+                    .collection('teams')
+                    .doc(teamId)
+                    .get();
+                if (teamDoc.exists) {
+                  teamNames[teamId] = teamDoc.data()?['name'] ?? teamId;
+                } else {
+                  teamNames[teamId] = teamId;
+                }
+              }
+            } catch (e) {
+              print('Error fetching team names: $e');
+            }
+          }
+          
+          // Second pass: create results with team names
+          Set<Map<String, dynamic>> uniquePlayers = {};
+          for (var player in matchingPlayers) {
+            final teamName = player['teamId'].isNotEmpty 
+                ? (teamNames[player['teamId']] ?? 'Unknown Team')
+                : 'Unknown Team';
+            
+            uniquePlayers.add({
+              'type': 'player',
+              'id': player['id'],
+              'data': player['data'],
+              'title': player['name'].isNotEmpty ? player['name'] : 'Unnamed Player',
+              'subtitle': '${player['role'].isNotEmpty ? player['role'] : 'Player'} • $teamName',
+              'icon': Icons.person,
+              'color': Colors.green,
+            });
           }
           
           results.addAll(uniquePlayers.toList());
@@ -204,20 +262,34 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   String _formatEventSubtitle(Map<String, dynamic> eventData) {
-    final dateStr = eventData['date'] as String?;
+    final dateField = eventData['date'];
     final location = eventData['location'] as String?;
     final sport = eventData['sport'] as String?;
     
     List<String> parts = [];
     if (sport != null) parts.add(sport);
-    if (dateStr != null) {
+    
+    // Handle different date formats - could be String, Timestamp, or null
+    if (dateField != null) {
       try {
-        final date = DateTime.parse(dateStr);
+        DateTime date;
+        if (dateField is Timestamp) {
+          // If it's a Firestore Timestamp, convert to DateTime
+          date = dateField.toDate();
+        } else if (dateField is String) {
+          // If it's a String, parse it
+          date = DateTime.parse(dateField);
+        } else {
+          // If it's already a DateTime, use it directly
+          date = dateField as DateTime;
+        }
         parts.add(DateFormat('MMM dd, yyyy').format(date));
       } catch (e) {
-        parts.add(dateStr);
+        // If parsing fails, just add the raw value as string
+        parts.add(dateField.toString());
       }
     }
+    
     if (location != null) parts.add(location);
     
     return parts.join(' • ');
