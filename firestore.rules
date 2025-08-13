@@ -50,6 +50,31 @@ service cloud.firestore {
     }
     
     // ==============================================================================
+    // TEAM REGISTRATIONS COLLECTION
+    // ==============================================================================
+    match /team_registrations/{registrationId} {
+      // Anyone can read team registrations
+      allow read: if true;
+      
+      // Authenticated users can create team registrations
+      allow create: if request.auth != null;
+      
+      // Team captains can update their registrations, admins can update any
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.captainId ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+      
+      // Team captains can delete their registrations, admins can delete any
+      allow delete: if request.auth != null && (
+        request.auth.uid == resource.data.captainId ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+    
+    // ==============================================================================
     // PLAYERS COLLECTION - FIXED FOR REGISTRATION  
     // ==============================================================================
     match /players/{playerId} {

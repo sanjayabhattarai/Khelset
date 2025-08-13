@@ -5,6 +5,7 @@ import 'home/featured_events_carousel.dart';
 import 'home/filter_chips.dart';
 import 'home/upcoming_events_list.dart';
 import 'profile_screen.dart';
+import 'search_screen.dart';
 
 // Theme colors
 const Color primaryColor = Color(0xff1DB954);
@@ -41,7 +42,11 @@ class HomeScreen extends StatelessWidget {
       actions: [
         IconButton(
           icon: const Icon(Icons.search, color: fontColor),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const SearchScreen()),
+            );
+          },
         ),
         IconButton(
           icon: const Icon(Icons.notifications_outlined, color: fontColor),
