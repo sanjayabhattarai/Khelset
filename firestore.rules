@@ -116,6 +116,42 @@ service cloud.firestore {
       allow write: if request.auth != null && 
                       exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      
+      // ==============================================================================
+      // DELIVERY HISTORY SUBCOLLECTION (COMMENTARY DATA)
+      // ==============================================================================
+      match /deliveries/{deliveryId} {
+        // Anyone can read delivery history for commentary
+        allow read: if true;
+        
+        // Only admins can create/update/delete delivery history
+        allow write: if request.auth != null && 
+                        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      }
+      
+      // Legacy support for old structure (can be removed later)
+      match /innings1_deliveryHistory/{deliveryId} {
+        allow read: if true;
+        allow write: if request.auth != null && 
+                        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      }
+      
+      match /innings2_deliveryHistory/{deliveryId} {
+        allow read: if true;
+        allow write: if request.auth != null && 
+                        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      }
+      
+      // Undo stack subcollection
+      match /undoStack/{undoId} {
+        allow read: if true;
+        allow write: if request.auth != null && 
+                        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      }
     }
     
     // ==============================================================================

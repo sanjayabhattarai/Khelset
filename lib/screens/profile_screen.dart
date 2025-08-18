@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:khelset/services/auth_service.dart';
+import 'package:khelset/theme/app_theme.dart';
 import 'login_screen.dart';
 
 // Dark theme constants to match home_screen.dart
@@ -22,13 +23,15 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic>? userData;
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
   }
 
-  Future<Map<String, dynamic>?> _getUserData(User user) async {
+  Future<void> _loadUserData(User user) async {
+    setState(() => isLoading = true);
     try {
       final doc = await FirebaseFirestore.instance
           .collection('users')
@@ -36,22 +39,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .get();
       
       if (doc.exists) {
-        return doc.data();
+        setState(() {
+          userData = doc.data();
+          isLoading = false;
+        });
       } else {
         // Create user document if it doesn't exist
         await _createUserDocument(user);
-        return {
-          'uid': user.uid,
-          'email': user.email ?? '',
-          'displayName': user.displayName ?? 'User',
-          'phoneNumber': user.phoneNumber ?? '',
-          'role': 'user',
-          'createdAt': DateTime.now().toIso8601String(),
-        };
       }
     } catch (e) {
       print('Error loading user data: $e');
-      return null;
+      setState(() => isLoading = false);
     }
   }
 
@@ -70,6 +68,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         .collection('users')
         .doc(user.uid)
         .set(newUserData);
+
+    setState(() {
+      userData = newUserData;
+      isLoading = false;
+    });
   }
 
   Future<void> _signOut() async {
@@ -166,27 +169,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: StreamBuilder<User?>(
         stream: AuthService().authStateChanges,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.connectionState == ConnectionState.waiting || isLoading) {
             return const Center(child: CircularProgressIndicator(color: darkPrimaryColor));
           }
           
           if (snapshot.hasData) {
             final user = snapshot.data!;
-            return FutureBuilder<Map<String, dynamic>?>(
-              future: _getUserData(user),
-              builder: (context, userDataSnapshot) {
-                if (userDataSnapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator(color: darkPrimaryColor));
-                }
-                
-                if (userDataSnapshot.hasData) {
-                  userData = userDataSnapshot.data;
-                  return _buildUserProfile(context, user);
-                }
-                
-                return const Center(child: CircularProgressIndicator(color: darkPrimaryColor));
-              },
-            );
+            // Load user data if we don't have it yet
+            if (userData == null) {
+              _loadUserData(user);
+              return const Center(child: CircularProgressIndicator(color: darkPrimaryColor));
+            }
+            return _buildUserProfile(context, user);
           }
           
           return _buildGuestProfile(context);

@@ -37,8 +37,16 @@ class HomeScreen extends StatelessWidget {
     return AppBar(
       backgroundColor: backgroundColor,
       elevation: 0,
-      title: const Text("Khelset", style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold)),
+      title: Container(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Image.asset(
+          'assets/khelset_logo.png',
+          height: 40,
+          fit: BoxFit.contain,
+        ),
+      ),
       centerTitle: false,
+      toolbarHeight: 60,
       actions: [
         IconButton(
           icon: const Icon(Icons.search, color: fontColor),
