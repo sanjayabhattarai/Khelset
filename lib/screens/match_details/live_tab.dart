@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:khelset/theme/app_theme.dart';
 import 'commentary_section.dart';
 
 class LiveTab extends StatelessWidget {
@@ -16,24 +15,34 @@ class LiveTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.all(16.0),
-          sliver: SliverList(
-            delegate: SliverChildListDelegate([
-              _ScoreSummaryCard(matchData: matchData),
-              const SizedBox(height: 16),
-              _PlayerStatsCard(matchData: matchData),
-              const SizedBox(height: 16),
-              CommentarySection(
-                allPlayers: allPlayers,
-                matchId: matchId,
-              ),
-            ]),
-          ),
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF121212), Color(0xFF2C2C2C)],
+          stops: [0.0, 0.8],
         ),
-      ],
+      ),
+      child: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.all(16.0),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                _ScoreSummaryCard(matchData: matchData),
+                const SizedBox(height: 16),
+                _PlayerStatsCard(matchData: matchData),
+                const SizedBox(height: 16),
+                CommentarySection(
+                  allPlayers: allPlayers,
+                  matchId: matchId,
+                ),
+              ]),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

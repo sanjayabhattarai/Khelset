@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:khelset/theme/app_theme.dart';
 
 class SquadsTab extends StatelessWidget {
   final List<Map<String, dynamic>> allPlayers;
@@ -28,33 +27,43 @@ class SquadsTab extends StatelessWidget {
     final List<Map<String, dynamic>> teamBPlayingXI = teamBPlayers.take(11).toList();
     final List<Map<String, dynamic>> teamBBench = teamBPlayers.skip(11).toList();
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          // Playing XI Section
-          _buildSquadSection(
-            context,
-            "PLAYING XI",
-            teamAPlayingXI,
-            teamBPlayingXI,
-            teamAName,
-            teamBName,
-            isPlayingXI: true,
-          ),
-          const SizedBox(height: 24),
-          // Bench Section
-          if (teamABench.isNotEmpty || teamBBench.isNotEmpty)
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF121212), Color(0xFF2C2C2C)],
+          stops: [0.0, 0.8],
+        ),
+      ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            // Playing XI Section
             _buildSquadSection(
               context,
-              "BENCH",
-              teamABench,
-              teamBBench,
+              "PLAYING XI",
+              teamAPlayingXI,
+              teamBPlayingXI,
               teamAName,
               teamBName,
-              isPlayingXI: false,
+              isPlayingXI: true,
             ),
-        ],
+            const SizedBox(height: 24),
+            // Bench Section
+            if (teamABench.isNotEmpty || teamBBench.isNotEmpty)
+              _buildSquadSection(
+                context,
+                "BENCH",
+                teamABench,
+                teamBBench,
+                teamAName,
+                teamBName,
+                isPlayingXI: false,
+              ),
+          ],
+        ),
       ),
     );
   }

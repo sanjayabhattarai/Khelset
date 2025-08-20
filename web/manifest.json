@@ -1,11 +1,11 @@
 {
-    "name": "firebase_test_app",
-    "short_name": "firebase_test_app",
+    "name": "Khelset - Cricket Scoring & Events",
+    "short_name": "Khelset",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#121212",
+    "theme_color": "#2C2C2C",
+    "description": "Cricket scoring and event management platform for tournaments and matches.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

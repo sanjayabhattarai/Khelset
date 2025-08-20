@@ -1,87 +1,101 @@
 import 'package:flutter/material.dart';
+import 'package:khelset/theme/app_theme.dart';
 
-// Import the new, separate widget files
-import 'home/featured_events_carousel.dart';
-import 'home/filter_chips.dart';
-import 'home/upcoming_events_list.dart';
+// Import the tab files
+import 'tabs/home_tab.dart';
+import 'tabs/favorites_tab.dart';
+import 'tabs/create_event_tab.dart';
 import 'profile_screen.dart';
-import 'search_screen.dart';
 
-// Theme colors
-const Color primaryColor = Color(0xff1DB954);
-const Color backgroundColor = Color(0xff121212);
-const Color fontColor = Colors.white;
-
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
-      appBar: _buildAppBar(context),
-      body: ListView(
-        children: [
-          _buildSectionTitle("Featured Events"),
-          const FeaturedEventsCarousel(),
-          _buildSectionTitle("Filter by Sport"),
-          const FilterChips(),
-          _buildSectionTitle("Upcoming"),
-          const UpcomingEventsList(),
-        ],
-      ),
+      body: _buildCurrentPage(),
+      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: backgroundColor,
-      elevation: 0,
-      title: Container(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Image.asset(
-          'assets/khelset_logo.png',
-          height: 40,
-          fit: BoxFit.contain,
-        ),
-      ),
-      centerTitle: false,
-      toolbarHeight: 60,
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.search, color: fontColor),
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const SearchScreen()),
-            );
+  Widget _buildCurrentPage() {
+    switch (_currentIndex) {
+      case 0:
+        return const HomeTab();
+      case 1:
+        return FavoritesTab(
+          onSwitchToHome: () {
+            setState(() {
+              _currentIndex = 0; // Switch to Home tab
+            });
           },
-        ),
-        IconButton(
-          icon: const Icon(Icons.notifications_outlined, color: fontColor),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: const Icon(Icons.account_circle_outlined, color: fontColor),
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const ProfileScreen()),
-            );
-          },
-        ),
-      ],
-    );
+        );
+      case 2:
+        return const ProfileScreen();
+      case 3:
+        return const CreateEventTab();
+      default:
+        return const HomeTab();
+    }
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Text(
-        title,
-        style: const TextStyle(
-          color: fontColor,
-          fontSize: 20,
+  Widget _buildBottomNavigationBar() {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF2C2C2C), Color(0xFF121212)],
+        ),
+      ),
+      child: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        currentIndex: _currentIndex,
+        selectedItemColor: primaryColor,
+        unselectedItemColor: Colors.white.withOpacity(0.6),
+        selectedLabelStyle: const TextStyle(
           fontWeight: FontWeight.bold,
+          fontSize: 12,
         ),
+        unselectedLabelStyle: const TextStyle(
+          fontSize: 12,
+        ),
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite_border),
+            activeIcon: Icon(Icons.favorite),
+            label: 'Favorites',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_circle_outline),
+            activeIcon: Icon(Icons.add_circle),
+            label: 'Create Event',
+          ),
+        ],
       ),
     );
   }

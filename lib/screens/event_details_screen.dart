@@ -1,12 +1,9 @@
 // lib/screens/event_details_screen.dart
-// This screen has been refactored to use a TabBar for better organization.
-// Its only job is to manage the tabs and pass the eventId to them.
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:khelset/theme/app_theme.dart';
 
-// ✨ CHANGE: Import the new, separate FixturesTab widget.
+// Import the new, separate FixturesTab widget.
 import 'event_details/fixtures_tab.dart';
 import 'event_details/info_tab.dart';
 import 'event_details/teams_tab.dart';
@@ -67,35 +64,113 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> with SingleTick
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: backgroundColor,
-        elevation: 0,
-        title: Text(_eventName),
+        backgroundColor: cardBackgroundColor,
+        elevation: 1,
+        title: Text(
+          _eventName,
+          style: const TextStyle(
+            color: fontColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         // The TabBar for navigating between the different sections.
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: primaryColor,
-          labelColor: primaryColor,
-          unselectedLabelColor: Colors.grey,
-          tabs: const [
-            Tab(text: "Fixtures"),
-            Tab(text: "Teams"),
-            Tab(text: "Info"),
-          ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: Container(
+            decoration: BoxDecoration(
+              color: cardBackgroundColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 2,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: TabBar(
+              controller: _tabController,
+              indicator: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: primaryColor,
+              ),
+              indicatorSize: TabBarIndicatorSize.tab,
+              indicatorWeight: 3,
+              indicatorPadding: const EdgeInsets.symmetric(horizontal: 16),
+              labelColor: Colors.white,
+              unselectedLabelColor: subFontColor,
+              labelStyle: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+              unselectedLabelStyle: const TextStyle(
+                fontWeight: FontWeight.normal,
+                fontSize: 14,
+              ),
+              tabs: const [
+                Tab(text: "Fixtures"),
+                Tab(text: "Teams"),
+                Tab(text: "Info"),
+              ],
+            ),
+          ),
         ),
       ),
       // The body now shows a loading indicator until the event data is fetched.
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+              ),
+            )
           : _eventData == null
-              ? const Center(child: Text("Event not found.", style: TextStyle(color: Colors.red)))
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    // ✨ CHANGE: Each child is now a dedicated widget imported from its own file.
-                    FixturesTab(eventId: widget.eventId),
-                    TeamsTab(eventId: widget.eventId),
-                    InfoTab(eventId: widget.eventId, eventData: _eventData!),
-                  ],
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: errorColor,
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        "Event not found",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: fontColor,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        "The requested event could not be loaded",
+                        style: TextStyle(
+                          color: subFontColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        backgroundColor,
+                        backgroundColor.withOpacity(0.9),
+                      ],
+                    ),
+                  ),
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      // Each child is now a dedicated widget imported from its own file.
+                      FixturesTab(eventId: widget.eventId),
+                      TeamsTab(eventId: widget.eventId),
+                      InfoTab(eventId: widget.eventId, eventData: _eventData!),
+                    ],
+                  ),
                 ),
     );
   }

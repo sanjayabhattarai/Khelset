@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:khelset/theme/app_theme.dart';
+import '../widgets/responsive_wrapper.dart';
+import '../core/utils/responsive_utils.dart';
 import 'event_details_screen.dart';
-
-// Theme Constants
-const Color primaryColor = Color(0xff1DB954);
-const Color backgroundColor = Color(0xff121212);
-const Color cardColor = Color(0xff1E1E1E);
-const Color fontColor = Colors.white;
-const Color subFontColor = Color(0xFFB3B3B3);
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -95,24 +91,18 @@ class _SearchScreenState extends State<SearchScreen> {
       // Search Events - This should work as events have read: if true
       if (_selectedFilter == 'All' || _selectedFilter == 'Events') {
         try {
-          print('Searching events for query: $query');
           final eventsSnapshot = await FirebaseFirestore.instance
               .collection('events')
               .limit(20)
               .get();
           
-          print('Found ${eventsSnapshot.docs.length} events in database');
-          
           for (var doc in eventsSnapshot.docs) {
             final data = doc.data();
-            print('Event data: $data');
             
             final eventName = data['name'] ?? data['eventName'] ?? '';
             final sport = data['sport'] ?? data['category'] ?? '';
             final location = data['location'] ?? data['venue'] ?? '';
             final description = data['description'] ?? '';
-            
-            print('Event: $eventName, Sport: $sport, Location: $location');
             
             // More flexible search - check if query is empty or matches any field
             bool matches = query.toLowerCase().isEmpty ||
@@ -122,7 +112,6 @@ class _SearchScreenState extends State<SearchScreen> {
                 description.toLowerCase().contains(query.toLowerCase());
             
             if (matches) {
-              print('Event matches query: $eventName');
               results.add({
                 'type': 'event',
                 'id': doc.id,
@@ -134,9 +123,8 @@ class _SearchScreenState extends State<SearchScreen> {
               });
             }
           }
-          print('Added ${results.where((r) => r['type'] == 'event').length} events to results');
         } catch (e) {
-          print('Error searching events: $e');
+          // Handle error silently in production
         }
       }
 
@@ -193,7 +181,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 }
               }
             } catch (e) {
-              print('Error fetching team names: $e');
+              // Handle error silently in production
             }
           }
           
@@ -211,13 +199,13 @@ class _SearchScreenState extends State<SearchScreen> {
               'title': player['name'].isNotEmpty ? player['name'] : 'Unnamed Player',
               'subtitle': '${player['role'].isNotEmpty ? player['role'] : 'Player'} • $teamName',
               'icon': Icons.person,
-              'color': Colors.green,
+              'color': successColor,
             });
           }
           
           results.addAll(uniquePlayers.toList());
         } catch (e) {
-          print('Error searching players: $e');
+          // Handle error silently in production
         }
       }
 
@@ -254,7 +242,7 @@ class _SearchScreenState extends State<SearchScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Search failed: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: errorColor,
           ),
         );
       }
@@ -312,7 +300,7 @@ class _SearchScreenState extends State<SearchScreen> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            backgroundColor: cardColor,
+            backgroundColor: cardBackgroundColor,
             title: Text(
               result['title'],
               style: const TextStyle(color: fontColor),
@@ -335,6 +323,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = ResponsiveUtils.isDesktop(context);
+    
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
@@ -347,7 +337,10 @@ class _SearchScreenState extends State<SearchScreen> {
         title: TextField(
           controller: _searchController,
           focusNode: _searchFocusNode,
-          style: const TextStyle(color: fontColor),
+          style: TextStyle(
+            color: fontColor,
+            fontSize: isDesktop ? 16 : 14,
+          ),
           decoration: InputDecoration(
             hintText: 'Search events and players...',
             hintStyle: TextStyle(color: subFontColor),
@@ -372,16 +365,21 @@ class _SearchScreenState extends State<SearchScreen> {
           },
           onSubmitted: _performSearch,
         ),
+        toolbarHeight: isDesktop ? 64 : 56, // Standard heights
       ),
-      body: Column(
-        children: [
-          // Filter Chips
-          Container(
-            height: 60,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: _filterOptions.length,
+      body: ResponsiveWrapper(
+        child: Column(
+          children: [
+            // Filter Chips
+            Container(
+              height: isDesktop ? 70 : 60,
+              padding: EdgeInsets.symmetric(
+                horizontal: isDesktop ? 0 : 16, 
+                vertical: 8
+              ),
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _filterOptions.length,
               itemBuilder: (context, index) {
                 final option = _filterOptions[index];
                 final isSelected = _selectedFilter == option;
@@ -405,11 +403,11 @@ class _SearchScreenState extends State<SearchScreen> {
                         _performSearch(_searchQuery);
                       }
                     },
-                    backgroundColor: cardColor,
+                    backgroundColor: cardBackgroundColor,
                     selectedColor: primaryColor,
                     checkmarkColor: backgroundColor,
                     side: BorderSide(
-                      color: isSelected ? primaryColor : Colors.grey.shade600,
+                      color: isSelected ? primaryColor : subFontColor,
                     ),
                   ),
                 );
@@ -417,7 +415,7 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
           
-          const Divider(color: Colors.grey, height: 1),
+          const Divider(color: subFontColor, height: 1),
           
           // Search Results
           Expanded(
@@ -435,6 +433,7 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ],
       ),
+    ),
     );
   }
 

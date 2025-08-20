@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:khelset/theme/app_theme.dart';
+import '../../services/favorites_service.dart';
+import '../../services/auth_service.dart';
+import '../../widgets/responsive_wrapper.dart';
+import '../../core/utils/responsive_utils.dart';
 import '../event_details_screen.dart';
-
-// Theme Constants
-const Color primaryColor = Color(0xff1DB954);
-const Color backgroundColor = Color(0xff121212);
-const Color cardColor = Color(0xff1E1E1E);
-const Color fontColor = Colors.white;
-const Color subFontColor = Color(0xFFB3B3B3);
-const Color liveBadgeColor = Color(0xFFE53935);
+import '../login_screen.dart';
 
 class UpcomingEventsList extends StatelessWidget {
   const UpcomingEventsList({super.key});
@@ -48,9 +46,7 @@ class UpcomingEventsList extends StatelessWidget {
             }
 
             if (snapshot.hasError) {
-              // Print the error for debugging
-              print('Firestore error: ${snapshot.error}');
-              
+              // Handle error silently in production
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -129,18 +125,18 @@ class UpcomingEventsList extends StatelessWidget {
 
             final events = snapshot.data!.docs;
 
-            return ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: events.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final eventDoc = events[index];
+            // Use responsive grid layout
+            return ResponsiveGrid(
+              mobileColumns: 1,
+              tabletColumns: 2,
+              desktopColumns: 2,
+              spacing: 16,
+              runSpacing: 16,
+              children: events.map((eventDoc) {
                 final eventData = eventDoc.data() as Map<String, dynamic>;
                 eventData['documentID'] = eventDoc.id;
                 return EventCard(eventData: eventData);
-              },
+              }).toList(),
             );
           },
         ),
@@ -149,9 +145,16 @@ class UpcomingEventsList extends StatelessWidget {
   }
 }
 
-class EventCard extends StatelessWidget {
+class EventCard extends StatefulWidget {
   final Map<String, dynamic> eventData;
   const EventCard({super.key, required this.eventData});
+
+  @override
+  State<EventCard> createState() => _EventCardState();
+}
+
+class _EventCardState extends State<EventCard> {
+  bool isLoading = false;
 
   IconData _getSportIcon(String sportType) {
     switch (sportType.toLowerCase()) {
@@ -173,40 +176,114 @@ class EventCard extends StatelessWidget {
   Color _getSportColor(String sportType) {
     switch (sportType.toLowerCase()) {
       case 'cricket':
-        return const Color(0xFF4CAF50);
+        return primaryColor; // Green
       case 'football':
-        return const Color(0xFF2196F3);
+        return secondaryColor; // Orange  
       case 'basketball':
-        return const Color(0xFFFF9800);
+        return tertiaryColor; // Red
       default:
         return primaryColor;
     }
   }
 
+  Future<void> _handleFavoriteToggle(String eventId) async {
+    final user = AuthService().currentUser;
+    if (user == null) {
+      // Show login prompt
+      _showLoginPrompt();
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      await FavoritesService().toggleFavorite(eventId);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update favorites: $e'),
+            backgroundColor: errorColor,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _showLoginPrompt() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: cardBackgroundColor,
+          title: const Text(
+            'Sign In Required',
+            style: TextStyle(color: fontColor, fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            'Please sign in to save your favorite events.',
+            style: TextStyle(color: subFontColor),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: subFontColor),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+              ),
+              child: const Text(
+                'Sign In',
+                style: TextStyle(color: cardBackgroundColor),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final eventName = eventData['eventName'] ?? 'Unnamed Event';
-    final location = eventData['location'] ?? 'Location not specified';
-    final sportType = eventData['sportType'] ?? 'General';
-    final isLive = eventData['isLive'] ?? false;
-    final eventId = eventData['documentID'] as String?;
-    final participants = eventData['participants'] ?? 0;
+    final eventName = widget.eventData['eventName'] ?? 'Unnamed Event';
+    final location = widget.eventData['location'] ?? 'Location not specified';
+    final sportType = widget.eventData['sportType'] ?? 'General';
+    final isLive = widget.eventData['isLive'] ?? false;
+    final eventId = widget.eventData['documentID'] as String?;
+    
+    final isDesktop = ResponsiveUtils.isDesktop(context);
+    final iconSize = isDesktop ? 32.0 : 28.0;
+    final titleFontSize = isDesktop ? 18.0 : 16.0;
+    final subtitleFontSize = isDesktop ? 14.0 : 13.0;
 
     String formattedDate = 'Date not set';
     String formattedTime = '';
-    if (eventData['date'] != null && eventData['date'] is Timestamp) {
-      final date = (eventData['date'] as Timestamp).toDate();
+    if (widget.eventData['date'] != null && widget.eventData['date'] is Timestamp) {
+      final date = (widget.eventData['date'] as Timestamp).toDate();
       formattedDate = DateFormat('EEE, MMM d').format(date);
       formattedTime = DateFormat('h:mm a').format(date);
     }
 
-    return Card(
-      elevation: 2,
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      color: cardColor,
+    return ResponsiveCard(
+      padding: EdgeInsets.all(isDesktop ? 20.0 : 16.0),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
@@ -219,133 +296,296 @@ class EventCard extends StatelessWidget {
             );
           }
         },
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              // Sport Icon with colored background
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: _getSportColor(sportType).withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  _getSportIcon(sportType),
-                  color: _getSportColor(sportType),
-                  size: 28,
-                ),
-              ),
-              const SizedBox(width: 16),
+        child: isDesktop ? _buildDesktopLayout(
+          eventName, location, sportType, isLive, eventId, formattedDate, 
+          formattedTime, iconSize, titleFontSize, subtitleFontSize
+        ) : _buildMobileLayout(
+          eventName, location, sportType, isLive, eventId, formattedDate, 
+          formattedTime, iconSize, titleFontSize, subtitleFontSize
+        ),
+      ),
+    );
+  }
 
-              // Event Details
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            eventName,
-                            style: const TextStyle(
-                              color: fontColor,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (isLive)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: liveBadgeColor,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Text(
-                              'LIVE',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                      ],
+  Widget _buildMobileLayout(
+    String eventName, String location, String sportType, bool isLive, 
+    String? eventId, String formattedDate, String formattedTime,
+    double iconSize, double titleFontSize, double subtitleFontSize
+  ) {
+    return Row(
+      children: [
+        // Sport Icon with colored background
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: _getSportColor(sportType).withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            _getSportIcon(sportType),
+            color: _getSportColor(sportType),
+            size: iconSize,
+          ),
+        ),
+        const SizedBox(width: 16),
+
+        // Event Details
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      eventName,
+                      style: TextStyle(
+                        color: fontColor,
+                        fontSize: titleFontSize,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.calendar_today,
-                          color: subFontColor,
-                          size: 16,
+                  ),
+                  if (isLive)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: errorColor,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        'LIVE',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '$formattedDate • $formattedTime',
-                          style: TextStyle(
-                            color: subFontColor,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on_outlined,
-                          color: subFontColor,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            location,
-                            style: TextStyle(
-                              color: subFontColor,
-                              fontSize: 13,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.people_outline,
-                          color: subFontColor,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '$participants ${participants == 1 ? 'participant' : 'participants'}',
-                          style: TextStyle(
-                            color: subFontColor,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                ],
               ),
-              const SizedBox(width: 8),
-              const Icon(
-                Icons.chevron_right,
-                color: subFontColor,
-              ),
+              const SizedBox(height: 8),
+              _buildInfoRow(Icons.calendar_today, '$formattedDate • $formattedTime', subtitleFontSize),
+              const SizedBox(height: 6),
+              _buildInfoRow(Icons.location_on_outlined, location, subtitleFontSize),
+              const SizedBox(height: 6),
+              _buildTeamCountRow(eventId, subtitleFontSize),
             ],
           ),
         ),
-      ),
+        const SizedBox(width: 8),
+        Column(
+          children: [
+            _buildFavoriteButton(eventId),
+            const SizedBox(height: 4),
+            const Icon(
+              Icons.chevron_right,
+              color: subFontColor,
+              size: 20,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDesktopLayout(
+    String eventName, String location, String sportType, bool isLive, 
+    String? eventId, String formattedDate, String formattedTime,
+    double iconSize, double titleFontSize, double subtitleFontSize
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            // Sport Icon with colored background
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: _getSportColor(sportType).withOpacity(0.2),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(
+                _getSportIcon(sportType),
+                color: _getSportColor(sportType),
+                size: iconSize,
+              ),
+            ),
+            const SizedBox(width: 20),
+            
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          eventName,
+                          style: TextStyle(
+                            color: fontColor,
+                            fontSize: titleFontSize,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (isLive)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: errorColor,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Text(
+                            'LIVE',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    sportType.toUpperCase(),
+                    style: TextStyle(
+                      color: _getSportColor(sportType),
+                      fontSize: subtitleFontSize - 1,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            _buildFavoriteButton(eventId),
+          ],
+        ),
+        
+        const SizedBox(height: 16),
+        
+        Row(
+          children: [
+            Expanded(
+              child: _buildInfoRow(Icons.calendar_today, '$formattedDate • $formattedTime', subtitleFontSize),
+            ),
+            const SizedBox(width: 24),
+            Expanded(
+              child: _buildInfoRow(Icons.location_on_outlined, location, subtitleFontSize),
+            ),
+          ],
+        ),
+        
+        const SizedBox(height: 8),
+        
+        _buildTeamCountRow(eventId, subtitleFontSize),
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String text, double fontSize) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          color: subFontColor,
+          size: 16,
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              color: subFontColor,
+              fontSize: fontSize,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTeamCountRow(String? eventId, double fontSize) {
+    return Row(
+      children: [
+        Icon(
+          Icons.people_outline,
+          color: subFontColor,
+          size: 16,
+        ),
+        const SizedBox(width: 6),
+        // Real-time participant count from registered teams
+        if (eventId != null)
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('teams')
+                .where('eventId', isEqualTo: eventId)
+                .snapshots(),
+            builder: (context, teamsSnapshot) {
+              final teamCount = teamsSnapshot.hasData ? teamsSnapshot.data!.docs.length : 0;
+              return Text(
+                '$teamCount ${teamCount == 1 ? 'team registered' : 'teams registered'}',
+                style: TextStyle(
+                  color: subFontColor,
+                  fontSize: fontSize,
+                ),
+              );
+            },
+          )
+        else
+          Text(
+            '0 teams registered',
+            style: TextStyle(
+              color: subFontColor,
+              fontSize: fontSize,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildFavoriteButton(String? eventId) {
+    if (eventId == null) return const SizedBox.shrink();
+    
+    return StreamBuilder<List<String>>(
+      stream: FavoritesService().getFavoriteEventsStream(),
+      builder: (context, snapshot) {
+        final favoriteIds = snapshot.data ?? [];
+        final isFavorite = favoriteIds.contains(eventId);
+        
+        return GestureDetector(
+          onTap: isLoading ? null : () => _handleFavoriteToggle(eventId),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            child: isLoading
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                    ),
+                  )
+                : Icon(
+                    isFavorite ? Icons.favorite : Icons.favorite_outline,
+                    color: isFavorite ? errorColor : subFontColor,
+                    size: 20,
+                  ),
+          ),
+        );
+      },
     );
   }
 }

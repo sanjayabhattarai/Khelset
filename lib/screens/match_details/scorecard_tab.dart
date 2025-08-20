@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:khelset/theme/app_theme.dart';
 import 'package:khelset/screens/match_details/awards_section.dart';
 
 class ScorecardTab extends StatelessWidget {
@@ -28,38 +27,48 @@ class ScorecardTab extends StatelessWidget {
       ...(innings2Data?['bowlingStats'] as List? ?? []).map((e) => e as Map<String, dynamic>),
     ].toList();
 
-    return CustomScrollView(
-      slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.all(16.0),
-          sliver: SliverList(
-            delegate: SliverChildListDelegate([
-              _MatchSummaryCard(matchData: matchData),
-              const SizedBox(height: 16),
-              if (innings1Data != null)
-                _InningsCard(
-                  inningsData: innings1Data,
-                  isInitiallyExpanded: true,
-                  teamColor: Theme.of(context).colorScheme.primary,
-                ),
-              const SizedBox(height: 12),
-              if (innings2Data != null && (innings2Data['battingStats'] as List).isNotEmpty)
-                _InningsCard(
-                  inningsData: innings2Data,
-                  isInitiallyExpanded: true,
-                  teamColor: Theme.of(context).colorScheme.secondary,
-                ),
-              if (isMatchCompleted && awardsData != null)
-                AwardsSection(
-                  awards: awardsData,
-                  allPlayers: allPlayers,
-                  allBattingStats: allBattingStats,
-                  allBowlingStats: allBowlingStats,
-                ),
-            ]),
-          ),
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF121212), Color(0xFF2C2C2C)],
+          stops: [0.0, 0.8],
         ),
-      ],
+      ),
+      child: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.all(16.0),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                _MatchSummaryCard(matchData: matchData),
+                const SizedBox(height: 16),
+                if (innings1Data != null)
+                  _InningsCard(
+                    inningsData: innings1Data,
+                    isInitiallyExpanded: true,
+                    teamColor: Theme.of(context).colorScheme.primary,
+                  ),
+                const SizedBox(height: 12),
+                if (innings2Data != null && (innings2Data['battingStats'] as List).isNotEmpty)
+                  _InningsCard(
+                    inningsData: innings2Data,
+                    isInitiallyExpanded: true,
+                    teamColor: Theme.of(context).colorScheme.secondary,
+                  ),
+                if (isMatchCompleted && awardsData != null)
+                  AwardsSection(
+                    awards: awardsData,
+                    allPlayers: allPlayers,
+                    allBattingStats: allBattingStats,
+                    allBowlingStats: allBowlingStats,
+                  ),
+              ]),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -317,7 +326,7 @@ class _InningsCard extends StatelessWidget {
                 Row(
                   children: [
                     Icon(
-                      Icons.sports_baseball,
+                      Icons.sports_cricket,
                       size: 16,
                       color: Theme.of(context).colorScheme.primary,
                     ),
@@ -340,7 +349,7 @@ class _InningsCard extends StatelessWidget {
                 Row(
                   children: [
                     Icon(
-                      Icons.sports_cricket,
+                      Icons.sports_baseball,
                       size: 16,
                       color: Theme.of(context).colorScheme.secondary,
                     ),
