@@ -64,7 +64,8 @@ class _LoginScreenState extends State<LoginScreen>
       }
     } catch (e) {
       if (mounted) {
-        _showErrorSnackBar(e.toString());
+        String errorMessage = "Authentication failed. Please try again.";
+        _showErrorSnackBar(errorMessage);
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -432,18 +433,27 @@ class _LoginScreenState extends State<LoginScreen>
                               const SizedBox(height: 24),
 
                               // Social Login Buttons
-                              _buildSocialButton(
-                                text: 'Continue with Google',
-                                imagePath: 'assets/google_logo.png',
-                                onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text("Google Sign-In coming soon!"),
-                                      backgroundColor: primaryColor,
-                                    ),
-                                  );
-                                },
-                              ),
+                              // Google Sign-In temporarily disabled - not working on web due to COOP policies
+                              // _buildSocialButton(
+                              //   text: kIsWeb ? 'Google Sign-In (Web Support Coming Soon)' : 'Continue with Google',
+                              //   imagePath: 'assets/google_logo.png',
+                              //   onPressed: kIsWeb 
+                              //     ? () {
+                              //         ScaffoldMessenger.of(context).showSnackBar(
+                              //           SnackBar(
+                              //             content: Text(
+                              //               'Google Sign-In is temporarily unavailable on web due to browser security policies. Please use email/password authentication.',
+                              //               style: TextStyle(color: Colors.white),
+                              //             ),
+                              //             backgroundColor: Colors.orange,
+                              //             duration: Duration(seconds: 4),
+                              //           ),
+                              //         );
+                              //       }
+                              //     : () => _handleAuthAction(
+                              //         _authService.signInWithGoogle(),
+                              //       ),
+                              // ),
 
                               _buildSocialButton(
                                 text: 'Continue with Phone',

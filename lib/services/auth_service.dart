@@ -58,15 +58,15 @@ GoogleSignIn? _googleSignIn;
 
 GoogleSignIn get googleSignIn {
   if (kIsWeb) {
-    // For web, use a web-specific client ID (you'll need to get this from Firebase Console)
+    // For web, we need to specify the web client ID and use popup mode
     _googleSignIn ??= GoogleSignIn(
-      clientId: '862681026576-web.apps.googleusercontent.com', // Replace with actual web client ID
+      clientId: '862681026576-0hktrf850btf29ckj6m4h7mktrq0p0e5.apps.googleusercontent.com',
+      scopes: ['email', 'profile'],
     );
   } else {
-    // For mobile platforms, use the androidClientId from Firebase options
+    // For mobile platforms
     _googleSignIn ??= GoogleSignIn(
-      // Use the Android client ID from your Firebase options
-      clientId: '862681026576-0hktrf850btf29ckj6m4h7mktrq0p0e5.apps.googleusercontent.com',
+      scopes: ['email', 'profile'],
     );
   }
   return _googleSignIn!;
@@ -74,40 +74,78 @@ GoogleSignIn get googleSignIn {
 
 Future<User?> signInWithGoogle() async {
   try {
+    debugPrint("Starting Google Sign-In...");
+    
+    // For web, try silent sign-in first (for better UX)
+    if (kIsWeb) {
+      try {
+        final GoogleSignInAccount? silentUser = await googleSignIn.signInSilently();
+        if (silentUser != null) {
+          debugPrint("Silent sign-in successful");
+          return await _processGoogleUser(silentUser);
+        }
+      } catch (e) {
+        debugPrint("Silent sign-in failed, proceeding with interactive sign-in");
+      }
+    }
+    
     final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
     if (googleUser == null) {
-      // The user canceled the sign-in
+      debugPrint("User canceled Google Sign-In");
       return null;
     }
 
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-    final AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-
-    UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
-
-    // After signing in, ensure a user document exists in Firestore
-    if (userCredential.user != null) {
-      final userDoc = FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid);
-      final docSnapshot = await userDoc.get();
-      if (!docSnapshot.exists) {
-        userDoc.set({
-          'email': userCredential.user!.email,
-          'role': 'user',
-          'createdAt': Timestamp.now(),
-        });
-      }
-    }
-    return userCredential.user;
+    return await _processGoogleUser(googleUser);
   } catch (e) {
     debugPrint("Google Sign In Failed: $e");
-    return null;
+    if (kIsWeb && (e.toString().contains('popup') || e.toString().contains('COOP'))) {
+      debugPrint("Popup blocked or COOP error. This is common in development mode.");
+      throw Exception('Google Sign-In popup was blocked. Please allow popups for this site or try email/password login.');
+    }
+    throw Exception('Google Sign-In failed: ${e.toString()}');
   }
 }
 
+Future<User?> _processGoogleUser(GoogleSignInAccount googleUser) async {
+  debugPrint("Processing Google user: ${googleUser.email}");
+  final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+  
+  if (googleAuth.accessToken == null && googleAuth.idToken == null) {
+    debugPrint("Failed to get Google authentication tokens");
+    throw Exception('Failed to get authentication tokens from Google');
+  }
+  
+  final AuthCredential credential = GoogleAuthProvider.credential(
+    accessToken: googleAuth.accessToken,
+    idToken: googleAuth.idToken,
+  );
 
+  debugPrint("Signing in with Firebase...");
+  UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
+
+  // After signing in, ensure a user document exists in Firestore
+  if (userCredential.user != null) {
+    await _createUserDocument(userCredential.user!);
+    debugPrint("Google Sign-In successful!");
+  }
+  
+  return userCredential.user;
+}
+
+Future<void> _createUserDocument(User user) async {
+  final userDoc = FirebaseFirestore.instance.collection('users').doc(user.uid);
+  final docSnapshot = await userDoc.get();
+  if (!docSnapshot.exists) {
+    await userDoc.set({
+      'email': user.email,
+      'displayName': user.displayName,
+      'photoURL': user.photoURL,
+      'role': 'user',
+      'createdAt': Timestamp.now(),
+    });
+    debugPrint("Created new user document in Firestore");
+  }
+}
 
   // Sign Out
   Future<void> signOut() async {

@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
-import 'package:khelset/theme/app_theme.dart';
-import '../widgets/responsive_wrapper.dart';
 import '../core/utils/responsive_utils.dart';
 import 'event_details_screen.dart';
 
@@ -16,24 +13,20 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
-  String _searchQuery = '';
-  String _selectedFilter = 'All';
-  bool _isLoading = false;
-
-  final List<String> _filterOptions = [
-    'All',
-    'Events',
-    'Players'
-  ];
-
+  
+  List<Map<String, dynamic>> _allData = [];
   List<Map<String, dynamic>> _searchResults = [];
-  List<String> _recentSearches = [];
+  bool _isLoading = true;
+  bool _hasSearched = false;
+  String _selectedFilter = 'All';
+
+  final List<String> _filters = ['All', 'Players', 'Events'];
 
   @override
   void initState() {
     super.initState();
+    _loadRealData();
     _searchFocusNode.requestFocus();
-    _loadRecentSearches();
   }
 
   @override
@@ -43,282 +36,129 @@ class _SearchScreenState extends State<SearchScreen> {
     super.dispose();
   }
 
-  void _loadRecentSearches() {
-    // In a real app, you'd load this from shared preferences
-    _recentSearches = [
-      'Cricket Tournament',
-      'Football League', 
-      'Virat Kohli',
-      'Basketball Championship',
-    ];
-  }
-
-  void _saveRecentSearch(String query) {
-    if (query.trim().isNotEmpty && !_recentSearches.contains(query)) {
-      setState(() {
-        _recentSearches.insert(0, query);
-        if (_recentSearches.length > 10) {
-          _recentSearches.removeLast();
-        }
-      });
-      // In a real app, save to shared preferences here
-    }
-  }
-
-  void _clearRecentSearches() {
-    setState(() {
-      _recentSearches.clear();
-    });
-  }
-
-  Future<void> _performSearch(String query) async {
-    if (query.trim().isEmpty) {
-      setState(() {
-        _searchResults.clear();
-        _searchQuery = '';
-      });
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _searchQuery = query;
-    });
-
+  Future<void> _loadRealData() async {
+    setState(() => _isLoading = true);
+    
     try {
-      List<Map<String, dynamic>> results = [];
-      
-      // Search Events - This should work as events have read: if true
-      if (_selectedFilter == 'All' || _selectedFilter == 'Events') {
-        try {
-          final eventsSnapshot = await FirebaseFirestore.instance
-              .collection('events')
-              .limit(20)
-              .get();
-          
-          for (var doc in eventsSnapshot.docs) {
-            final data = doc.data();
-            
-            final eventName = data['name'] ?? data['eventName'] ?? '';
-            final sport = data['sport'] ?? data['category'] ?? '';
-            final location = data['location'] ?? data['venue'] ?? '';
-            final description = data['description'] ?? '';
-            
-            // More flexible search - check if query is empty or matches any field
-            bool matches = query.toLowerCase().isEmpty ||
-                eventName.toLowerCase().contains(query.toLowerCase()) ||
-                sport.toLowerCase().contains(query.toLowerCase()) ||
-                location.toLowerCase().contains(query.toLowerCase()) ||
-                description.toLowerCase().contains(query.toLowerCase());
-            
-            if (matches) {
-              results.add({
-                'type': 'event',
-                'id': doc.id,
-                'data': data,
-                'title': eventName.isNotEmpty ? eventName : 'Unnamed Event',
-                'subtitle': _formatEventSubtitle(data),
-                'icon': Icons.event,
-                'color': primaryColor,
-              });
-            }
-          }
-        } catch (e) {
-          // Handle error silently in production
-        }
-      }
+      final results = await Future.wait([
+        _fetchEvents(),
+        _fetchPlayers(),
+      ]);
 
-      // Search Players - Using the players collection
-      if (_selectedFilter == 'All' || _selectedFilter == 'Players') {
-        try {
-          final playersSnapshot = await FirebaseFirestore.instance
-              .collection('players')
-              .limit(50)
-              .get();
-          
-          List<Map<String, dynamic>> matchingPlayers = [];
-          Set<String> teamIds = {};
-          
-          // First pass: collect matching players and unique team IDs
-          for (var doc in playersSnapshot.docs) {
-            final playerData = doc.data();
-            final playerName = playerData['name'] ?? '';
-            final role = playerData['role'] ?? '';
-            final teamId = playerData['teamId'] ?? '';
-            
-            if (playerName.toLowerCase().contains(query.toLowerCase()) ||
-                role.toLowerCase().contains(query.toLowerCase())) {
-              
-              matchingPlayers.add({
-                'id': doc.id,
-                'data': playerData,
-                'name': playerName,
-                'role': role,
-                'teamId': teamId,
-              });
-              
-              if (teamId.isNotEmpty) {
-                teamIds.add(teamId);
-              }
-              
-              if (matchingPlayers.length >= 20) break;
-            }
-          }
-          
-          // Batch fetch team names
-          Map<String, String> teamNames = {};
-          if (teamIds.isNotEmpty) {
-            try {
-              for (String teamId in teamIds) {
-                final teamDoc = await FirebaseFirestore.instance
-                    .collection('teams')
-                    .doc(teamId)
-                    .get();
-                if (teamDoc.exists) {
-                  teamNames[teamId] = teamDoc.data()?['name'] ?? teamId;
-                } else {
-                  teamNames[teamId] = teamId;
-                }
-              }
-            } catch (e) {
-              // Handle error silently in production
-            }
-          }
-          
-          // Second pass: create results with team names
-          Set<Map<String, dynamic>> uniquePlayers = {};
-          for (var player in matchingPlayers) {
-            final teamName = player['teamId'].isNotEmpty 
-                ? (teamNames[player['teamId']] ?? 'Unknown Team')
-                : 'Unknown Team';
-            
-            uniquePlayers.add({
-              'type': 'player',
-              'id': player['id'],
-              'data': player['data'],
-              'title': player['name'].isNotEmpty ? player['name'] : 'Unnamed Player',
-              'subtitle': '${player['role'].isNotEmpty ? player['role'] : 'Player'} • $teamName',
-              'icon': Icons.person,
-              'color': successColor,
-            });
-          }
-          
-          results.addAll(uniquePlayers.toList());
-        } catch (e) {
-          // Handle error silently in production
-        }
-      }
+      final events = results[0];
+      final players = results[1];
 
-      // Sort results by relevance (exact matches first)
-      results.sort((a, b) {
-        final aTitle = a['title'].toString().toLowerCase();
-        final bTitle = b['title'].toString().toLowerCase();
-        final queryLower = query.toLowerCase();
-        
-        final aExact = aTitle == queryLower ? 1 : 0;
-        final bExact = bTitle == queryLower ? 1 : 0;
-        
-        if (aExact != bExact) return bExact - aExact;
-        
-        final aStarts = aTitle.startsWith(queryLower) ? 1 : 0;
-        final bStarts = bTitle.startsWith(queryLower) ? 1 : 0;
-        
-        return bStarts - aStarts;
-      });
+      print('Loaded ${events.length} events and ${players.length} players');
+      if (events.isNotEmpty) {
+        print('First event: ${events.first['title']}');
+      }
+      if (players.isNotEmpty) {
+        print('First player: ${players.first['title']}');
+      }
 
       setState(() {
-        _searchResults = results.take(50).toList();
+        _allData = [...events, ...players];
         _isLoading = false;
       });
-
-      _saveRecentSearch(query);
-      
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _searchResults.clear();
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Search failed: $e'),
-            backgroundColor: errorColor,
-          ),
-        );
-      }
+      print('Error loading data: $e');
+      setState(() => _isLoading = false);
     }
   }
 
-  String _formatEventSubtitle(Map<String, dynamic> eventData) {
-    final dateField = eventData['date'];
-    final location = eventData['location'] as String?;
-    final sport = eventData['sport'] as String?;
-    
-    List<String> parts = [];
-    if (sport != null) parts.add(sport);
-    
-    // Handle different date formats - could be String, Timestamp, or null
-    if (dateField != null) {
-      try {
-        DateTime date;
-        if (dateField is Timestamp) {
-          // If it's a Firestore Timestamp, convert to DateTime
-          date = dateField.toDate();
-        } else if (dateField is String) {
-          // If it's a String, parse it
-          date = DateTime.parse(dateField);
-        } else {
-          // If it's already a DateTime, use it directly
-          date = dateField as DateTime;
-        }
-        parts.add(DateFormat('MMM dd, yyyy').format(date));
-      } catch (e) {
-        // If parsing fails, just add the raw value as string
-        parts.add(dateField.toString());
-      }
+  Future<List<Map<String, dynamic>>> _fetchEvents() async {
+    try {
+      // Get all events without ordering first to test basic connectivity
+      final snapshot = await FirebaseFirestore.instance
+          .collection('events')
+          .get();
+      
+      print('Events collection query returned ${snapshot.docs.length} documents');
+      
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        // Use either 'name' or 'eventName' field
+        final eventTitle = data['name'] ?? data['eventName'] ?? 'Unknown Event';
+        
+        print('Event found: $eventTitle');
+        
+        return {
+          'id': doc.id,
+          'title': eventTitle,
+          'subtitle': data['description'] ?? 'No description',
+          'type': 'Event',
+          'category': 'Events',
+          'status': data['status'] ?? 'active',
+          'location': data['location'] ?? '',
+          'color': Colors.green,
+          'icon': Icons.event,
+          'stats': 'Location: ${data['location'] ?? 'TBD'}',
+          'rawData': data,
+        };
+      }).toList();
+    } catch (e) {
+      print('Error fetching events: $e');
+      return [];
     }
-    
-    if (location != null) parts.add(location);
-    
-    return parts.join(' • ');
   }
 
-  void _onResultTap(Map<String, dynamic> result) {
-    switch (result['type']) {
-      case 'event':
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => EventDetailsScreen(
-              eventId: result['id'],
-            ),
-          ),
-        );
-        break;
-      case 'player':
-        // Show a simple dialog with player details
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            backgroundColor: cardBackgroundColor,
-            title: Text(
-              result['title'],
-              style: const TextStyle(color: fontColor),
-            ),
-            content: Text(
-              result['subtitle'],
-              style: const TextStyle(color: subFontColor),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Close', style: TextStyle(color: primaryColor)),
-              ),
-            ],
-          ),
-        );
-        break;
+  Future<List<Map<String, dynamic>>> _fetchPlayers() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('players')
+          .orderBy('name')
+          .get();
+      
+      return snapshot.docs.map((doc) => {
+        'id': doc.id,
+        'title': doc.data()['name'] ?? 'Unknown Player',
+        'subtitle': doc.data()['role'] ?? 'Unknown Role',
+        'type': 'Player',
+        'category': 'Players',
+        'teamId': doc.data()['teamId'],
+        'eventId': doc.data()['eventId'],
+        'color': Colors.orange,
+        'icon': Icons.person,
+        'stats': 'Role: ${doc.data()['role'] ?? 'Unknown'}',
+        'rawData': doc.data(),
+      }).toList();
+    } catch (e) {
+      print('Error fetching players: $e');
+      return [];
     }
+  }
+
+  void _handleSearch(String query) {
+    setState(() {
+      _hasSearched = true;
+      if (query.isEmpty) {
+        _searchResults = [];
+      } else {
+        _searchResults = _allData.where((item) {
+          final title = item['title']?.toString() ?? '';
+          final subtitle = item['subtitle']?.toString() ?? '';
+          final stats = item['stats']?.toString() ?? '';
+          final category = item['category']?.toString() ?? '';
+          
+          final matchesQuery = title.toLowerCase().contains(query.toLowerCase()) ||
+              subtitle.toLowerCase().contains(query.toLowerCase()) ||
+              stats.toLowerCase().contains(query.toLowerCase());
+          
+          final matchesFilter = _selectedFilter == 'All' || category == _selectedFilter;
+          
+          return matchesQuery && matchesFilter;
+        }).toList();
+      }
+    });
+  }
+
+  void _handleFilterChange(String filter) {
+    setState(() {
+      _selectedFilter = filter;
+      if (_hasSearched) {
+        _handleSearch(_searchController.text);
+      }
+    });
   }
 
   @override
@@ -326,184 +166,271 @@ class _SearchScreenState extends State<SearchScreen> {
     final isDesktop = ResponsiveUtils.isDesktop(context);
     
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: const Color(0xFF0F0F0F),
       appBar: AppBar(
-        backgroundColor: backgroundColor,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: fontColor),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: TextField(
-          controller: _searchController,
-          focusNode: _searchFocusNode,
-          style: TextStyle(
-            color: fontColor,
-            fontSize: isDesktop ? 16 : 14,
-          ),
-          decoration: InputDecoration(
-            hintText: 'Search events and players...',
-            hintStyle: TextStyle(color: subFontColor),
-            border: InputBorder.none,
-            suffixIcon: _searchController.text.isNotEmpty
-                ? IconButton(
-                    icon: const Icon(Icons.clear, color: subFontColor),
-                    onPressed: () {
-                      _searchController.clear();
-                      _performSearch('');
-                    },
-                  )
-                : const Icon(Icons.search, color: subFontColor),
-          ),
-          onChanged: (value) {
-            // Debounce search
-            Future.delayed(const Duration(milliseconds: 300), () {
-              if (_searchController.text == value) {
-                _performSearch(value);
-              }
-            });
-          },
-          onSubmitted: _performSearch,
+        title: const Text(
+          'Search',
+          style: TextStyle(color: Colors.white, fontSize: 20),
         ),
-        toolbarHeight: isDesktop ? 64 : 56, // Standard heights
       ),
-      body: ResponsiveWrapper(
+      body: Padding(
+        padding: EdgeInsets.all(isDesktop ? 24 : 16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Filter Chips
+            // Integrated Search Bar
             Container(
-              height: isDesktop ? 70 : 60,
-              padding: EdgeInsets.symmetric(
-                horizontal: isDesktop ? 0 : 16, 
-                vertical: 8
+              height: 48,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
               ),
+              child: TextField(
+                controller: _searchController,
+                focusNode: _searchFocusNode,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'Search players and events...',
+                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+                  prefixIcon: Icon(Icons.search, color: Colors.white.withValues(alpha: 0.7)),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(Icons.clear, color: Colors.white.withValues(alpha: 0.7)),
+                          onPressed: () {
+                            _searchController.clear();
+                            _handleSearch('');
+                          },
+                        )
+                      : null,
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                onChanged: (value) {
+                  setState(() {}); // Rebuild to show/hide clear button
+                  _handleSearch(value);
+                },
+              ),
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Filter Chips
+            SizedBox(
+              height: 40,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: _filterOptions.length,
-              itemBuilder: (context, index) {
-                final option = _filterOptions[index];
-                final isSelected = _selectedFilter == option;
-                
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    label: Text(
-                      option,
-                      style: TextStyle(
-                        color: isSelected ? backgroundColor : fontColor,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                itemCount: _filters.length,
+                itemBuilder: (context, index) {
+                  final filter = _filters[index];
+                  final isSelected = _selectedFilter == filter;
+                  
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: FilterChip(
+                      label: Text(
+                        filter,
+                        style: TextStyle(
+                          color: isSelected ? Colors.black : Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
+                      selected: isSelected,
+                      onSelected: (_) => _handleFilterChange(filter),
+                      backgroundColor: Colors.white.withValues(alpha: 0.1),
+                      selectedColor: Colors.white,
+                      side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
+                      checkmarkColor: Colors.black,
                     ),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        _selectedFilter = option;
-                      });
-                      if (_searchQuery.isNotEmpty) {
-                        _performSearch(_searchQuery);
-                      }
-                    },
-                    backgroundColor: cardBackgroundColor,
-                    selectedColor: primaryColor,
-                    checkmarkColor: backgroundColor,
-                    side: BorderSide(
-                      color: isSelected ? primaryColor : subFontColor,
-                    ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
-          
-          const Divider(color: subFontColor, height: 1),
-          
-          // Search Results
-          Expanded(
-            child: _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
-                    ),
-                  )
-                : _searchQuery.isEmpty
-                    ? _buildRecentSearches()
-                    : _searchResults.isEmpty
-                        ? _buildNoResults()
-                        : _buildSearchResults(),
-          ),
-        ],
-      ),
-    ),
-    );
-  }
-
-  Widget _buildRecentSearches() {
-    if (_recentSearches.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.search, size: 64, color: subFontColor),
-            SizedBox(height: 16),
-            Text(
-              'Search for events and players',
-              style: TextStyle(color: subFontColor, fontSize: 16),
-              textAlign: TextAlign.center,
+            
+            const SizedBox(height: 24),
+            
+            // Content
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                  : !_hasSearched
+                      ? _buildInitialState()
+                      : _searchResults.isEmpty
+                          ? _buildNoResults()
+                          : _buildSearchResults(),
             ),
           ],
         ),
-      );
-    }
+      ),
+    );
+  }
 
+  Widget _buildInitialState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.search, size: 64, color: Colors.grey),
+          const SizedBox(height: 16),
+          const Text(
+            'Search players and events',
+            style: TextStyle(color: Colors.white, fontSize: 18),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Find cricket players and tournament events\nLoaded ${_allData.length} items from database',
+            style: const TextStyle(color: Colors.grey, fontSize: 14),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoResults() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.search_off, size: 64, color: Colors.grey),
+          SizedBox(height: 16),
+          Text(
+            'No results found',
+            style: TextStyle(color: Colors.white, fontSize: 18),
+          ),
+          Text(
+            'Try different keywords or change filters',
+            style: TextStyle(color: Colors.grey, fontSize: 14),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchResults() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Recent Searches',
-                style: TextStyle(
-                  color: fontColor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '${_searchResults.length} results found',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.8),
+                fontSize: 16,
               ),
-              TextButton(
-                onPressed: _clearRecentSearches,
-                child: const Text(
-                  'Clear All',
-                  style: TextStyle(color: primaryColor),
+            ),
+            if (_selectedFilter != 'All')
+              Chip(
+                label: Text(
+                  _selectedFilter,
+                  style: const TextStyle(color: Colors.black, fontSize: 12),
                 ),
+                backgroundColor: Colors.white,
+                side: BorderSide.none,
               ),
-            ],
-          ),
+          ],
         ),
+        const SizedBox(height: 16),
         Expanded(
           child: ListView.builder(
-            itemCount: _recentSearches.length,
+            itemCount: _searchResults.length,
             itemBuilder: (context, index) {
-              final search = _recentSearches[index];
-              return ListTile(
-                leading: const Icon(Icons.history, color: subFontColor),
-                title: Text(
-                  search,
-                  style: const TextStyle(color: fontColor),
+              final result = _searchResults[index];
+              
+              return GestureDetector(
+                onTap: () => _handleItemTap(result),
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: result['color'].withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          result['icon'],
+                          color: result['color'],
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              result['title'],
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              result['subtitle'],
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.7),
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              result['stats'],
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.5),
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: result['color'].withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              result['type'],
+                              style: TextStyle(
+                                color: result['color'],
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.white.withValues(alpha: 0.5),
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.close, color: subFontColor),
-                  onPressed: () {
-                    setState(() {
-                      _recentSearches.removeAt(index);
-                    });
-                  },
-                ),
-                onTap: () {
-                  _searchController.text = search;
-                  _performSearch(search);
-                },
               );
             },
           ),
@@ -512,82 +439,23 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildNoResults() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.search_off, size: 64, color: subFontColor),
-          const SizedBox(height: 16),
-          Text(
-            'No results found for "$_searchQuery"',
-            style: const TextStyle(color: fontColor, fontSize: 18),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Try different keywords or check your spelling',
-            style: TextStyle(color: subFontColor, fontSize: 14),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchResults() {
-    return ListView.builder(
-      itemCount: _searchResults.length,
-      itemBuilder: (context, index) {
-        final result = _searchResults[index];
-        
-        return ListTile(
-          leading: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: result['color'].withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              result['icon'],
-              color: result['color'],
-              size: 24,
-            ),
-          ),
-          title: Text(
-            result['title'],
-            style: const TextStyle(
-              color: fontColor,
-              fontWeight: FontWeight.w600,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          subtitle: Text(
-            result['subtitle'],
-            style: const TextStyle(color: subFontColor),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          trailing: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: result['color'].withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              result['type'].toUpperCase(),
-              style: TextStyle(
-                color: result['color'],
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          onTap: () => _onResultTap(result),
-        );
-      },
-    );
+  void _handleItemTap(Map<String, dynamic> result) {
+    if (result['type'] == 'Event') {
+      // Navigate to event details screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => EventDetailsScreen(eventId: result['id']),
+        ),
+      );
+    } else if (result['type'] == 'Player') {
+      // For now, show a snackbar for players (you can add player details screen later)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Player details for ${result['title']} coming soon!'),
+          backgroundColor: Colors.blue,
+        ),
+      );
+    }
   }
 }

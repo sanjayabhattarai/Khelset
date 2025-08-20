@@ -88,8 +88,8 @@ class CustomSliverAppBar extends StatelessWidget {
     return Row(
       children: [
         TextButton.icon(
-          icon: Icon(Icons.search, color: Colors.white.withOpacity(0.9), size: 20),
-          label: Text('Search', style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14)),
+          icon: Icon(Icons.search, color: Colors.white.withValues(alpha: 0.9), size: 20),
+          label: Text('Search', style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 14)),
           style: TextButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             foregroundColor: Colors.white,
@@ -102,8 +102,8 @@ class CustomSliverAppBar extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         TextButton.icon(
-          icon: Icon(Icons.notifications_outlined, color: Colors.white.withOpacity(0.9), size: 20),
-          label: Text('Notifications', style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14)),
+          icon: Icon(Icons.notifications_outlined, color: Colors.white.withValues(alpha: 0.9), size: 20),
+          label: Text('Notifications', style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 14)),
           style: TextButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             foregroundColor: Colors.white,
@@ -123,7 +123,7 @@ class CustomSliverAppBar extends StatelessWidget {
     return Row(
       children: [
         IconButton(
-          icon: Icon(Icons.search, color: Colors.white.withOpacity(0.9), size: 22),
+          icon: Icon(Icons.search, color: Colors.white.withValues(alpha: 0.9), size: 22),
           onPressed: () {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => const SearchScreen()),
@@ -131,7 +131,7 @@ class CustomSliverAppBar extends StatelessWidget {
           },
         ),
         IconButton(
-          icon: Icon(Icons.notifications_outlined, color: Colors.white.withOpacity(0.9), size: 22),
+          icon: Icon(Icons.notifications_outlined, color: Colors.white.withValues(alpha: 0.9), size: 22),
           onPressed: () {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Notifications coming soon!')),
