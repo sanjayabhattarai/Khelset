@@ -89,9 +89,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> with SingleTick
             ),
             child: TabBar(
               controller: _tabController,
-              indicator: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: primaryColor,
+              indicator: UnderlineTabIndicator(
+                borderSide: BorderSide(width: 4, color: primaryColor.withOpacity(0.85)),
+                insets: EdgeInsets.symmetric(horizontal: 32),
               ),
               indicatorSize: TabBarIndicatorSize.tab,
               indicatorWeight: 3,
@@ -107,9 +107,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> with SingleTick
                 fontSize: 14,
               ),
               tabs: const [
-                Tab(text: "Fixtures"),
-                Tab(text: "Teams"),
                 Tab(text: "Info"),
+                Tab(text: "Teams"),
+                Tab(text: "Fixtures"),
               ],
             ),
           ),
@@ -165,10 +165,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> with SingleTick
                   child: TabBarView(
                     controller: _tabController,
                     children: [
-                      // Each child is now a dedicated widget imported from its own file.
-                      FixturesTab(eventId: widget.eventId),
-                      TeamsTab(eventId: widget.eventId),
                       InfoTab(eventId: widget.eventId, eventData: _eventData!),
+                      TeamsTab(eventId: widget.eventId),
+                      FixturesTab(eventId: widget.eventId),
                     ],
                   ),
                 ),

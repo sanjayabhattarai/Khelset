@@ -20,198 +20,88 @@ class SquadsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> teamAPlayers = allPlayers.where((p) => p['teamId'] == teamAId).toList();
     final List<Map<String, dynamic>> teamBPlayers = allPlayers.where((p) => p['teamId'] == teamBId).toList();
-    
-    // Separate playing XI and bench players (assuming first 11 are playing XI)
     final List<Map<String, dynamic>> teamAPlayingXI = teamAPlayers.take(11).toList();
     final List<Map<String, dynamic>> teamABench = teamAPlayers.skip(11).toList();
     final List<Map<String, dynamic>> teamBPlayingXI = teamBPlayers.take(11).toList();
     final List<Map<String, dynamic>> teamBBench = teamBPlayers.skip(11).toList();
 
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF121212), Color(0xFF2C2C2C)],
-          stops: [0.0, 0.8],
-        ),
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Playing XI Section
-            _buildSquadSection(
-              context,
-              "PLAYING XI",
-              teamAPlayingXI,
-              teamBPlayingXI,
-              teamAName,
-              teamBName,
-              isPlayingXI: true,
-            ),
-            const SizedBox(height: 24),
-            // Bench Section
-            if (teamABench.isNotEmpty || teamBBench.isNotEmpty)
-              _buildSquadSection(
-                context,
-                "BENCH",
-                teamABench,
-                teamBBench,
-                teamAName,
-                teamBName,
-                isPlayingXI: false,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSquadSection(
-    BuildContext context,
-    String sectionTitle,
-    List<Map<String, dynamic>> teamAPlayers,
-    List<Map<String, dynamic>> teamBPlayers,
-    String teamAName,
-    String teamBName, {
-    required bool isPlayingXI,
-  }) {
-    final Color backgroundColor = isPlayingXI 
-        ? Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5)
-        : Theme.of(context).colorScheme.surface.withOpacity(0.7);
-    final Color sectionColor = isPlayingXI 
-        ? Theme.of(context).colorScheme.primary.withOpacity(0.8)
-        : Theme.of(context).colorScheme.secondary.withOpacity(0.6);
-
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: Theme.of(context).dividerColor.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      color: backgroundColor,
-      child: Column(
-        children: [
-          // Section Header
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            decoration: BoxDecoration(
-              color: sectionColor,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Text(
-              sectionTitle,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.2,
-              ),
-            ),
-          ),
-          // Teams Row
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Team A
-                Expanded(
-                  child: _buildTeamColumn(context, teamAName, teamAPlayers, isLeft: true),
-                ),
-                // Vertical Separator
-                Container(
-                  width: 1,
-                  margin: const EdgeInsets.symmetric(vertical: 12),
-                  color: Theme.of(context).dividerColor.withOpacity(0.3),
-                ),
-                // Team B
-                Expanded(
-                  child: _buildTeamColumn(context, teamBName, teamBPlayers, isLeft: false),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTeamColumn(
-    BuildContext context,
-    String teamName,
-    List<Map<String, dynamic>> players,
-    {required bool isLeft}
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Team Name
-          Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 600;
+        return SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 32, vertical: 16),
+          child: Column(
             children: [
-              if (!isLeft) const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                  ),
-                ),
-                child: Text(
-                  teamName.toUpperCase(),
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-              if (isLeft) const Spacer(),
+              _buildTeamExpansion(context, teamAName, teamAPlayingXI, teamABench, isMobile),
+              const SizedBox(height: 16),
+              _buildTeamExpansion(context, teamBName, teamBPlayingXI, teamBBench, isMobile),
             ],
           ),
-          const SizedBox(height: 16),
-          // Players List
-          ...players.asMap().entries.map((entry) {
-            final index = entry.key;
-            final player = entry.value;
-            final isLast = index == players.length - 1;
-            
-            return Column(
-              children: [
-                _buildPlayerItem(context, player),
-                if (!isLast)
-                  Divider(
-                    height: 16,
-                    thickness: 0.5,
-                    color: Theme.of(context).dividerColor.withOpacity(0.2),
-                  ),
-              ],
-            );
-          }).toList(),
+        );
+      },
+    );
+  }
+
+  Widget _buildTeamExpansion(BuildContext context, String teamName, List<Map<String, dynamic>> playingXI, List<Map<String, dynamic>> bench, bool isMobile) {
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: ExpansionTile(
+        title: Text(
+          teamName,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: isMobile ? 16 : 20,
+          ),
+        ),
+        childrenPadding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 24, vertical: 8),
+        children: [
+          _buildSquadSection(context, "PLAYING XI", playingXI, isMobile),
+          if (bench.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _buildSquadSection(context, "BENCH", bench, isMobile),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildPlayerItem(BuildContext context, Map<String, dynamic> player) {
+  Widget _buildSquadSection(BuildContext context, String sectionTitle, List<Map<String, dynamic>> players, bool isMobile) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          sectionTitle,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            color: sectionTitle == "PLAYING XI"
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.secondary,
+            fontWeight: FontWeight.bold,
+            fontSize: isMobile ? 14 : 16,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ...players.asMap().entries.map((entry) {
+          final index = entry.key;
+          final player = entry.value;
+          final isLast = index == players.length - 1;
+          return Column(
+            children: [
+              _buildPlayerItem(context, player, isMobile),
+              if (!isLast)
+                Divider(
+                  height: 12,
+                  thickness: 0.5,
+                  color: Theme.of(context).dividerColor.withOpacity(0.2),
+                ),
+            ],
+          );
+        }).toList(),
+      ],
+    );
+  }
+
+  Widget _buildPlayerItem(BuildContext context, Map<String, dynamic> player, bool isMobile) {
     final playerName = player['name'] ?? 'Unknown Player';
     final playerRole = player['role'] ?? 'Player';
     final isCaptain = player['isCaptain'] == true;
@@ -228,100 +118,94 @@ class SquadsTab extends StatelessWidget {
       displayRole += ' (wk)';
     }
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: () {
-        // Add player tap functionality here
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Row(
-          children: [
-            // Player Avatar
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Theme.of(context).colorScheme.surface,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-                border: Border.all(
-                  color: isCaptain 
-                      ? Colors.amber 
-                      : Theme.of(context).colorScheme.outline.withOpacity(0.2),
-                  width: isCaptain ? 2 : 1,
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: isMobile ? 6 : 10),
+      child: Row(
+        children: [
+          Container(
+            width: isMobile ? 36 : 48,
+            height: isMobile ? 36 : 48,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Theme.of(context).colorScheme.surface,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 3,
+                  offset: const Offset(0, 1),
                 ),
+              ],
+              border: Border.all(
+                color: isCaptain 
+                    ? Colors.amber 
+                    : Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                width: isCaptain ? 2 : 1,
               ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Icon(
-                    Icons.person,
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                    size: 28,
-                  ),
-                  if (isWicketkeeper)
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.green,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Theme.of(context).colorScheme.surface,
-                            width: 2,
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.sports_baseball,
-                          color: Colors.white,
-                          size: 12,
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(
+                  Icons.person,
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                  size: isMobile ? 22 : 28,
+                ),
+                if (isWicketkeeper)
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.surface,
+                          width: 2,
                         ),
                       ),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 16),
-            // Player Details
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    displayName,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    displayRole,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                      child: const Icon(
+                        Icons.sports_baseball,
+                        color: Colors.white,
+                        size: 10,
+                      ),
                     ),
                   ),
-                ],
-              ),
+              ],
             ),
-            // Additional info or action button
-            Icon(
-              Icons.chevron_right,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+          ),
+          SizedBox(width: isMobile ? 10 : 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  displayName,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontWeight: FontWeight.w600,
+                    fontSize: isMobile ? 13 : 16,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  displayRole,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    fontSize: isMobile ? 11 : 13,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Icon(
+            Icons.chevron_right,
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+            size: isMobile ? 18 : 22,
+          ),
+        ],
       ),
     );
   }

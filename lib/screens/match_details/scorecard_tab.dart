@@ -42,7 +42,19 @@ class ScorecardTab extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                _MatchSummaryCard(matchData: matchData),
+                if (isMatchCompleted && awardsData != null)
+                  AwardsSection(
+                    awards: awardsData,
+                    allPlayers: allPlayers,
+                    allBattingStats: allBattingStats,
+                    allBowlingStats: allBowlingStats,
+                  ),
+                if (isMatchCompleted && awardsData != null) const SizedBox(height: 16),
+                _MatchSummaryCard(
+                  matchData: matchData,
+                  allBattingStats: allBattingStats,
+                  allBowlingStats: allBowlingStats,
+                ),
                 const SizedBox(height: 16),
                 if (innings1Data != null)
                   _InningsCard(
@@ -57,13 +69,6 @@ class ScorecardTab extends StatelessWidget {
                     isInitiallyExpanded: true,
                     teamColor: Theme.of(context).colorScheme.secondary,
                   ),
-                if (isMatchCompleted && awardsData != null)
-                  AwardsSection(
-                    awards: awardsData,
-                    allPlayers: allPlayers,
-                    allBattingStats: allBattingStats,
-                    allBowlingStats: allBowlingStats,
-                  ),
               ]),
             ),
           ),
@@ -73,17 +78,29 @@ class ScorecardTab extends StatelessWidget {
   }
 }
 
-class _MatchSummaryCard extends StatelessWidget {
+class _MatchSummaryCard extends StatefulWidget {
   final Map<String, dynamic> matchData;
-  const _MatchSummaryCard({required this.matchData});
+  final List<Map<String, dynamic>> allBattingStats;
+  final List<Map<String, dynamic>> allBowlingStats;
+
+  const _MatchSummaryCard({
+    required this.matchData,
+    required this.allBattingStats,
+    required this.allBowlingStats,
+  });
 
   @override
+  __MatchSummaryCardState createState() => __MatchSummaryCardState();
+}
+
+class __MatchSummaryCardState extends State<_MatchSummaryCard> {
+  @override
   Widget build(BuildContext context) {
-    final status = matchData['status'] ?? 'Upcoming';
-    final innings1 = matchData['innings1'] as Map<String, dynamic>;
-    final innings2 = matchData['innings2'] as Map<String, dynamic>;
-    final eventName = matchData['eventName'] ?? "T20 Match";
-    final rules = matchData['rules'] as Map<String, dynamic>? ?? {};
+    final status = widget.matchData['status'] ?? 'Upcoming';
+    final innings1 = widget.matchData['innings1'] as Map<String, dynamic>;
+    final innings2 = widget.matchData['innings2'] as Map<String, dynamic>;
+    final eventName = widget.matchData['eventName'] ?? "T20 Match";
+    final rules = widget.matchData['rules'] as Map<String, dynamic>? ?? {};
     final playersPerTeam = (rules['playersPerTeam'] as num?)?.toInt() ?? 11;
 
     final team1Name = innings1['battingTeamName'] ?? 'Team 1';
@@ -95,7 +112,7 @@ class _MatchSummaryCard extends StatelessWidget {
       final score2 = innings2['score'] ?? 0;
 
       if (score1 > score2) {
-        resultMessage = "$team1Name won by ${score1 - score2} runs";
+        resultMessage = "$team1Name won by "+(score1 - score2).toString()+" runs";
       } else if (score2 > score1) {
         final wicketsInHand = (playersPerTeam - 1) - (innings2['wickets'] ?? 0);
         resultMessage = "$team2Name won by $wicketsInHand wickets";
@@ -104,88 +121,30 @@ class _MatchSummaryCard extends StatelessWidget {
       }
     }
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                eventName,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
-                ),
-              ),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: status == 'Completed'
+                  ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                  : Colors.amber.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
             ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _TeamScoreDisplay(
-                  teamName: team1Name,
-                  score: innings1['score'] ?? 0,
-                  wickets: innings1['wickets'] ?? 0,
-                  overs: (innings1['overs'] as num? ?? 0).toDouble(),
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    "VS",
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                _TeamScoreDisplay(
-                  teamName: team2Name,
-                  score: innings2['score'] ?? 0,
-                  wickets: innings2['wickets'] ?? 0,
-                  overs: (innings2['overs'] as num? ?? 0).toDouble(),
-                  color: Theme.of(context).colorScheme.secondary,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Divider(height: 1),
-            Padding(
-              padding: const EdgeInsets.only(top: 12.0),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: status == 'Completed'
-                      ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
-                      : Colors.amber.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  resultMessage,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: status == 'Completed'
-                        ? Theme.of(context).colorScheme.primary
-                        : Colors.amber.shade800,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+            child: Text(
+              resultMessage,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: status == 'Completed'
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.amber.shade800,
               ),
+              textAlign: TextAlign.center,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -197,6 +156,9 @@ class _TeamScoreDisplay extends StatelessWidget {
   final int wickets;
   final double overs;
   final Color color;
+  final bool isExpanded;
+  final VoidCallback onTap;
+  final bool isSmallScreen;
 
   const _TeamScoreDisplay({
     required this.teamName,
@@ -204,59 +166,228 @@ class _TeamScoreDisplay extends StatelessWidget {
     required this.wickets,
     required this.overs,
     required this.color,
+    required this.isExpanded,
+    required this.onTap,
+    required this.isSmallScreen,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: color.withOpacity(0.3),
-              width: 1,
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            constraints: const BoxConstraints(maxWidth: 120),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: color.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Flexible(
+                  child: Text(
+                    _getAbbreviatedTeamName(teamName),
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 10 : 12,
+                      fontWeight: FontWeight.bold,
+                      color: color,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 2),
+                Icon(
+                  isExpanded ? Icons.expand_less : Icons.expand_more,
+                  size: 14,
+                  color: color,
+                ),
+              ],
             ),
           ),
-          child: Text(
-            teamName.toUpperCase(),
+          const SizedBox(height: 6),
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: '$score',
+                  style: TextStyle(
+                    fontSize: isSmallScreen ? 16 : 18,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                TextSpan(
+                  text: '/$wickets',
+                  style: TextStyle(
+                    fontSize: isSmallScreen ? 12 : 14,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            '${overs.toStringAsFixed(1)} ov',
+            style: TextStyle(
+              fontSize: isSmallScreen ? 10 : 12,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getAbbreviatedTeamName(String name) {
+    // Simple abbreviation logic: take the first three letters, and if it's too long, take the first letter of each part
+    if (name.length <= 3) return name.toUpperCase();
+    final parts = name.split(' ');
+    if (parts.length > 1) {
+      return '${parts[0][0].toUpperCase()}${parts[1][0].toUpperCase()}';
+    }
+    return name.substring(0, 3).toUpperCase();
+  }
+}
+
+class _TeamDetailedStats extends StatelessWidget {
+  final String teamName;
+  final Color teamColor;
+  final List<Map<String, dynamic>> allBattingStats;
+  final List<Map<String, dynamic>> allBowlingStats;
+  final bool isTeam1;
+
+  const _TeamDetailedStats({
+    required this.teamName,
+    required this.teamColor,
+    required this.allBattingStats,
+    required this.allBowlingStats,
+    required this.isTeam1,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Filter stats for this specific team
+    final teamBattingStats = allBattingStats.where((stat) {
+      final playerTeam = stat['team'] ?? '';
+      return isTeam1 ? playerTeam.contains(teamName) : !playerTeam.contains(teamName);
+    }).toList();
+    
+    final teamBowlingStats = allBowlingStats.where((stat) {
+      final playerTeam = stat['team'] ?? '';
+      return isTeam1 ? playerTeam.contains(teamName) : !playerTeam.contains(teamName);
+    }).toList();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Top Performers Header
+          Text(
+            '$teamName Top Performers',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: color,
+              color: teamColor,
             ),
           ),
-        ),
-        const SizedBox(height: 8),
-        RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: '$score',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+          const SizedBox(height: 12),
+          
+          // Top 3 Batsmen
+          if (teamBattingStats.isNotEmpty) ...[
+            Text(
+              'Batting',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               ),
-              TextSpan(
-                text: '/$wickets',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                ),
+            ),
+            const SizedBox(height: 8),
+            ...teamBattingStats.take(3).map((player) => _PlayerPerformanceRow(
+              name: player['name'] ?? 'Player',
+              runs: player['runs'] ?? 0,
+              balls: player['balls'] ?? 0,
+              isBatsman: true,
+            )),
+            const SizedBox(height: 12),
+          ],
+          
+          // Top 3 Bowlers
+          if (teamBowlingStats.isNotEmpty) ...[
+            Text(
+              'Bowling',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               ),
-            ],
+            ),
+            const SizedBox(height: 8),
+            ...teamBowlingStats.take(3).map((player) => _PlayerPerformanceRow(
+              name: player['name'] ?? 'Player',
+              runs: player['runs'] ?? 0,
+              wickets: player['wickets'] ?? 0,
+              isBatsman: false,
+            )),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _PlayerPerformanceRow extends StatelessWidget {
+  final String name;
+  final int runs;
+  final int balls;
+  final int wickets;
+  final bool isBatsman;
+
+  const _PlayerPerformanceRow({
+    required this.name,
+    required this.runs,
+    this.balls = 0,
+    this.wickets = 0,
+    required this.isBatsman,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              name,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          '${overs.toStringAsFixed(1)} overs',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+          Expanded(
+            flex: 1,
+            child: Text(
+              isBatsman ? '$runs ($balls)' : '$wickets/$runs',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.end,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

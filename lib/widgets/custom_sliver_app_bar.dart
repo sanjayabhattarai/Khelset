@@ -7,6 +7,7 @@ class CustomSliverAppBar extends StatelessWidget {
   final bool showSearchAndNotifications;
   final Color backgroundColor;
   final List<Color> gradientColors;
+  final bool extendBeyondToolbar;
 
   const CustomSliverAppBar({
     super.key,
@@ -14,37 +15,31 @@ class CustomSliverAppBar extends StatelessWidget {
     this.showSearchAndNotifications = false,
     this.backgroundColor = const Color(0xFF121212),
     this.gradientColors = const [Color(0xFF121212), Color(0xFF2C2C2C)],
+    this.extendBeyondToolbar = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveUtils.isDesktop(context);
-    
     return SliverAppBar(
       backgroundColor: backgroundColor,
-      elevation: 2,
+      elevation: 0,
       pinned: true,
       floating: false,
       snap: false,
       surfaceTintColor: Colors.transparent,
       toolbarHeight: isDesktop ? 80 : 70,
-      title: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: gradientColors,
-            stops: const [0.0, 0.8],
-          ),
-        ),
+      flexibleSpace: Container(
+        color: backgroundColor,
         child: SafeArea(
           bottom: false,
           child: Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: isDesktop ? 24 : 16,
+              horizontal: isDesktop ? 24 : 8,
               vertical: 12,
             ),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Logo
@@ -52,20 +47,23 @@ class CustomSliverAppBar extends StatelessWidget {
                   tag: 'logo',
                   child: Image.asset(
                     'assets/khelset_logo.png',
-                    height: isDesktop ? 40 : 36,
+                    height: isDesktop ? 40 : 32,
                   ),
                 ),
-                const Spacer(),
                 // Title
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: isDesktop ? 20 : 18,
-                    fontWeight: FontWeight.bold,
+                Flexible(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: isDesktop ? 18 : 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
                   ),
                 ),
-                const Spacer(),
                 // Actions or spacer
                 if (showSearchAndNotifications && title == 'Home') ...[
                   if (isDesktop) ...[
@@ -74,7 +72,7 @@ class CustomSliverAppBar extends StatelessWidget {
                     _buildMobileActions(context),
                   ],
                 ] else ...[
-                  SizedBox(width: isDesktop ? 40 : 36),
+                  SizedBox(width: isDesktop ? 32 : 28),
                 ],
               ],
             ),
@@ -87,27 +85,21 @@ class CustomSliverAppBar extends StatelessWidget {
   Widget _buildDesktopActions(BuildContext context) {
     return Row(
       children: [
-        TextButton.icon(
-          icon: Icon(Icons.search, color: Colors.white.withValues(alpha: 0.9), size: 20),
-          label: Text('Search', style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 14)),
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            foregroundColor: Colors.white,
-          ),
+        _buildActionButton(
+          context,
+          icon: Icons.search,
+          label: 'Search',
           onPressed: () {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => const SearchScreen()),
             );
           },
         ),
-        const SizedBox(width: 8),
-        TextButton.icon(
-          icon: Icon(Icons.notifications_outlined, color: Colors.white.withValues(alpha: 0.9), size: 20),
-          label: Text('Notifications', style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 14)),
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            foregroundColor: Colors.white,
-          ),
+        const SizedBox(width: 12),
+        _buildActionButton(
+          context,
+          icon: Icons.notifications_outlined,
+          label: 'Notifications',
           onPressed: () {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Notifications coming soon!')),
@@ -123,7 +115,7 @@ class CustomSliverAppBar extends StatelessWidget {
     return Row(
       children: [
         IconButton(
-          icon: Icon(Icons.search, color: Colors.white.withValues(alpha: 0.9), size: 22),
+          icon: Icon(Icons.search, color: Colors.white.withOpacity(0.9), size: 24),
           onPressed: () {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => const SearchScreen()),
@@ -131,7 +123,7 @@ class CustomSliverAppBar extends StatelessWidget {
           },
         ),
         IconButton(
-          icon: Icon(Icons.notifications_outlined, color: Colors.white.withValues(alpha: 0.9), size: 22),
+          icon: Icon(Icons.notifications_outlined, color: Colors.white.withOpacity(0.9), size: 24),
           onPressed: () {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Notifications coming soon!')),
@@ -139,6 +131,34 @@ class CustomSliverAppBar extends StatelessWidget {
           },
         ),
       ],
+    );
+  }
+
+  Widget _buildActionButton(BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return TextButton(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        foregroundColor: Colors.white.withOpacity(0.9),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        backgroundColor: Colors.white.withOpacity(0.1),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
     );
   }
 }

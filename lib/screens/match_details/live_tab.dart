@@ -15,34 +15,81 @@ class LiveTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF121212), Color(0xFF2C2C2C)],
-          stops: [0.0, 0.8],
-        ),
-      ),
-      child: CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.all(16.0),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                _ScoreSummaryCard(matchData: matchData),
-                const SizedBox(height: 16),
-                _PlayerStatsCard(matchData: matchData),
-                const SizedBox(height: 16),
-                CommentarySection(
-                  allPlayers: allPlayers,
-                  matchId: matchId,
-                ),
-              ]),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isWideScreen = constraints.maxWidth > 800;
+        
+        return Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF121212), Color(0xFF2C2C2C)],
+              stops: [0.0, 0.8],
             ),
           ),
-        ],
-      ),
+          child: isWideScreen ? _buildWideLayout(context) : _buildMobileLayout(context),
+        );
+      },
+    );
+  }
+
+  Widget _buildMobileLayout(BuildContext context) {
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(16.0),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              _ScoreSummaryCard(matchData: matchData),
+              const SizedBox(height: 16),
+              _PlayerStatsCard(matchData: matchData),
+              const SizedBox(height: 16),
+              CommentarySection(
+                matchData: matchData,
+                allPlayers: allPlayers,
+              ),
+            ]),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWideLayout(BuildContext context) {
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(20.0),
+          sliver: SliverToBoxAdapter(
+            child: Column(
+              children: [
+                // Top row with score summary and player stats side by side
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: _ScoreSummaryCard(matchData: matchData),
+                    ),
+                    const SizedBox(width: 20),
+                    Expanded(
+                      flex: 3,
+                      child: _PlayerStatsCard(matchData: matchData),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                // Commentary section
+                CommentarySection(
+                  matchData: matchData,
+                  allPlayers: allPlayers,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -62,29 +109,29 @@ class _ScoreSummaryCard extends StatelessWidget {
     final crr = overs > 0 ? (score / overs) : 0.0;
 
     return Card(
-      elevation: 2,
+      elevation: 4,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(4),
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    'INNINGS ${currentInningsNum}',
+                    'INNINGS $currentInningsNum',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
+                      letterSpacing: 0.8,
                     ),
                   ),
                 ),
@@ -93,19 +140,21 @@ class _ScoreSummaryCard extends StatelessWidget {
                   'CRR: ${crr.toStringAsFixed(2)}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Text(
               teamName.toUpperCase(),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface,
                 fontWeight: FontWeight.bold,
+                fontSize: 18,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -117,6 +166,7 @@ class _ScoreSummaryCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.displaySmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).colorScheme.onSurface,
+                          fontSize: 36,
                         ),
                       ),
                       TextSpan(
@@ -124,14 +174,15 @@ class _ScoreSummaryCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                          fontSize: 28,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 6.0),
+                  padding: const EdgeInsets.only(bottom: 8.0),
                   child: Text(
                     '(${overs.toStringAsFixed(1)} ov)',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -141,9 +192,9 @@ class _ScoreSummaryCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             const Divider(height: 1),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             _buildRecentOvers(inningsData['recentOvers'] ?? []),
           ],
         ),
@@ -160,28 +211,29 @@ class _ScoreSummaryCard extends StatelessWidget {
         Text(
           'RECENT OVERS',
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 13,
             fontWeight: FontWeight.bold,
-            color: Colors.grey.shade600,
-            letterSpacing: 0.5,
+            color: Colors.grey.shade500,
+            letterSpacing: 0.8,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Wrap(
-          spacing: 8,
-          runSpacing: 4,
+          spacing: 10,
+          runSpacing: 6,
           children: recentOvers.reversed.take(6).map((over) {
             return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(4),
+                color: Colors.grey.shade800,
+                borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
                 over.toString(),
                 style: const TextStyle(
-                  fontSize: 12,
+                  fontSize: 13,
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             );
@@ -217,21 +269,21 @@ class _PlayerStatsCard extends StatelessWidget {
     );
 
     return Card(
-      elevation: 2,
+      elevation: 4,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Batting Section
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
               ),
             ),
             child: Text(
@@ -239,15 +291,16 @@ class _PlayerStatsCard extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.bold,
+                fontSize: 16,
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Column(
               children: [
                 _buildHeaderRow(context, ["BATSMAN", "R", "B", "4s", "6s", "SR"]),
-                const Divider(height: 16),
+                const Divider(height: 20),
                 if (onStrikeBatsman.isNotEmpty) 
                   _buildBatsmanRow(context, onStrikeBatsman, isStriker: true),
                 if (nonStrikeBatsman.isNotEmpty) 
@@ -257,12 +310,12 @@ class _PlayerStatsCard extends StatelessWidget {
           ),
           // Bowling Section
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
               border: const Border(
                 top: BorderSide(
-                  color: Colors.black12,
+                  color: Colors.black26,
                   width: 1,
                 ),
               ),
@@ -272,15 +325,16 @@ class _PlayerStatsCard extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.bold,
+                fontSize: 16,
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Column(
               children: [
                 _buildHeaderRow(context, ["BOWLER", "O", "M", "R", "W", "ECON"]),
-                const Divider(height: 16),
+                const Divider(height: 20),
                 if (currentBowler.isNotEmpty) 
                   _buildBowlerRow(context, currentBowler),
               ],
@@ -293,7 +347,7 @@ class _PlayerStatsCard extends StatelessWidget {
 
   Widget _buildHeaderRow(BuildContext context, List<String> headers) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
+      padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
         children: [
           Expanded(
@@ -302,7 +356,8 @@ class _PlayerStatsCard extends StatelessWidget {
               headers[0],
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                fontSize: 12,
               ),
             ),
           ),
@@ -313,7 +368,8 @@ class _PlayerStatsCard extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                  fontSize: 12,
                 ),
               ),
             );
@@ -331,7 +387,7 @@ class _PlayerStatsCard extends StatelessWidget {
     final sr = balls > 0 ? ((runs / balls) * 100).toStringAsFixed(1) : "0.0";
     
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Row(
         children: [
           Expanded(
@@ -340,9 +396,9 @@ class _PlayerStatsCard extends StatelessWidget {
               children: [
                 if (isStriker)
                   Container(
-                    width: 8,
-                    height: 8,
-                    margin: const EdgeInsets.only(right: 8),
+                    width: 10,
+                    height: 10,
+                    margin: const EdgeInsets.only(right: 10),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: Theme.of(context).colorScheme.primary,
@@ -354,6 +410,7 @@ class _PlayerStatsCard extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 14,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -367,6 +424,7 @@ class _PlayerStatsCard extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
+                fontSize: 14,
               ),
             ),
           ),
@@ -374,21 +432,27 @@ class _PlayerStatsCard extends StatelessWidget {
             child: Text(
               balls.toString(),
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: 14,
+              ),
             ),
           ),
           Expanded(
             child: Text(
               fours.toString(),
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: 14,
+              ),
             ),
           ),
           Expanded(
             child: Text(
               sixes.toString(),
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: 14,
+              ),
             ),
           ),
           Expanded(
@@ -397,6 +461,7 @@ class _PlayerStatsCard extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
+                fontSize: 14,
               ),
             ),
           ),
@@ -413,7 +478,7 @@ class _PlayerStatsCard extends StatelessWidget {
     final economy = overs > 0 ? (runs / overs).toStringAsFixed(2) : "0.00";
     
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Row(
         children: [
           Expanded(
@@ -423,6 +488,7 @@ class _PlayerStatsCard extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 14,
               ),
               overflow: TextOverflow.ellipsis,
             ),
@@ -433,6 +499,7 @@ class _PlayerStatsCard extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
+                fontSize: 14,
               ),
             ),
           ),
@@ -440,14 +507,18 @@ class _PlayerStatsCard extends StatelessWidget {
             child: Text(
               maidens.toString(),
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: 14,
+              ),
             ),
           ),
           Expanded(
             child: Text(
               runs.toString(),
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: 14,
+              ),
             ),
           ),
           Expanded(
@@ -456,6 +527,7 @@ class _PlayerStatsCard extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
+                fontSize: 14,
               ),
             ),
           ),
@@ -465,6 +537,7 @@ class _PlayerStatsCard extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
+                fontSize: 14,
               ),
             ),
           ),
