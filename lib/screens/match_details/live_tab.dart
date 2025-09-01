@@ -13,6 +13,23 @@ class LiveTab extends StatelessWidget {
     required this.matchId,
   });
 
+  // Helper methods for safe type conversion
+  double _safeDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
+
+  int _safeInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -98,14 +115,31 @@ class _ScoreSummaryCard extends StatelessWidget {
   final Map<String, dynamic> matchData;
   const _ScoreSummaryCard({required this.matchData});
 
+  // Helper methods for safe type conversion
+  double _safeDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
+
+  int _safeInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentInningsNum = matchData['currentInnings'] ?? 1;
     final inningsData = (currentInningsNum == 1 ? matchData['innings1'] : matchData['innings2']) as Map<String, dynamic>? ?? {};
     final teamName = inningsData['battingTeamName'] ?? 'TBD';
-    final score = inningsData['score'] ?? 0;
-    final wickets = inningsData['wickets'] ?? 0;
-    final overs = (inningsData['overs'] as num?)?.toDouble() ?? 0.0;
+    final score = _safeInt(inningsData['score']);
+    final wickets = _safeInt(inningsData['wickets']);
+    final overs = _safeDouble(inningsData['overs']);
     final crr = overs > 0 ? (score / overs) : 0.0;
 
     return Card(
@@ -247,6 +281,23 @@ class _ScoreSummaryCard extends StatelessWidget {
 class _PlayerStatsCard extends StatelessWidget {
   final Map<String, dynamic> matchData;
   const _PlayerStatsCard({required this.matchData});
+
+  // Helper methods for safe type conversion
+  double _safeDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
+
+  int _safeInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -471,10 +522,10 @@ class _PlayerStatsCard extends StatelessWidget {
   }
 
   Widget _buildBowlerRow(BuildContext context, Map<String, dynamic> bowler) {
-    final overs = (bowler['overs'] as num?)?.toDouble() ?? 0.0;
-    final maidens = bowler['maidens'] ?? 0;
-    final runs = bowler['runs'] ?? 0;
-    final wickets = bowler['wickets'] ?? 0;
+    final overs = _safeDouble(bowler['overs']);
+    final maidens = _safeInt(bowler['maidens']);
+    final runs = _safeInt(bowler['runs']);
+    final wickets = _safeInt(bowler['wickets']);
     final economy = overs > 0 ? (runs / overs).toStringAsFixed(2) : "0.00";
     
     return Padding(

@@ -11,6 +11,23 @@ class ScorecardTab extends StatelessWidget {
     required this.allPlayers,
   });
 
+  // Helper methods for safe type conversion
+  double _safeDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
+
+  int _safeInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     final innings1Data = matchData['innings1'] as Map<String, dynamic>?;
@@ -94,6 +111,23 @@ class _MatchSummaryCard extends StatefulWidget {
 }
 
 class __MatchSummaryCardState extends State<_MatchSummaryCard> {
+  // Helper methods for safe type conversion
+  double _safeDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
+
+  int _safeInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     final status = widget.matchData['status'] ?? 'Upcoming';
@@ -101,7 +135,7 @@ class __MatchSummaryCardState extends State<_MatchSummaryCard> {
     final innings2 = widget.matchData['innings2'] as Map<String, dynamic>;
     final eventName = widget.matchData['eventName'] ?? "T20 Match";
     final rules = widget.matchData['rules'] as Map<String, dynamic>? ?? {};
-    final playersPerTeam = (rules['playersPerTeam'] as num?)?.toInt() ?? 11;
+    final playersPerTeam = _safeInt(rules['playersPerTeam'] ?? 11);
 
     final team1Name = innings1['battingTeamName'] ?? 'Team 1';
     final team2Name = innings2['battingTeamName'] ?? 'Team 2';
@@ -403,12 +437,29 @@ class _InningsCard extends StatelessWidget {
     required this.teamColor,
   });
 
+  // Helper methods for safe type conversion
+  double _safeDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
+
+  int _safeInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     final teamName = inningsData['battingTeamName'] ?? 'Team';
-    final score = inningsData['score'] ?? 0;
-    final wickets = inningsData['wickets'] ?? 0;
-    final overs = (inningsData['overs'] as num? ?? 0).toDouble();
+    final score = _safeInt(inningsData['score']);
+    final wickets = _safeInt(inningsData['wickets']);
+    final overs = _safeDouble(inningsData['overs']);
     final battingStats = List<Map<String, dynamic>>.from(inningsData['battingStats'] ?? []);
     final bowlingStats = List<Map<String, dynamic>>.from(inningsData['bowlingStats'] ?? []);
 
@@ -670,11 +721,28 @@ Widget _buildBatsmanRow(BuildContext context, Map<String, dynamic> player) {
   );
 }
 
+// Global helper functions for safe type conversion
+double _safeDouble(dynamic value) {
+  if (value == null) return 0.0;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) return double.tryParse(value) ?? 0.0;
+  return 0.0;
+}
+
+int _safeInt(dynamic value) {
+  if (value == null) return 0;
+  if (value is int) return value;
+  if (value is double) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? 0;
+  return 0;
+}
+
 Widget _buildBowlerRow(BuildContext context, Map<String, dynamic> player) {
-  final runsConceded = player['runs'] ?? 0;
-  final oversBowled = (player['overs'] as num? ?? 0).toDouble();
-  final maidens = player['maidens'] ?? 0;
-  final wickets = player['wickets'] ?? 0;
+  final runsConceded = _safeInt(player['runs']);
+  final oversBowled = _safeDouble(player['overs']);
+  final maidens = _safeInt(player['maidens']);
+  final wickets = _safeInt(player['wickets']);
   final econ = oversBowled > 0 ? (runsConceded / oversBowled).toStringAsFixed(2) : "0.00";
 
   return Container(

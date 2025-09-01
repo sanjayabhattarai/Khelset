@@ -11,6 +11,23 @@ class CommentarySection extends StatelessWidget {
     required this.allPlayers,
   }) : super(key: key);
 
+  // Helper methods for safe type conversion
+  double _safeDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
+
+  int _safeInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     // Separate lists for each innings
@@ -190,9 +207,9 @@ class CommentarySection extends StatelessWidget {
   Widget _buildInningsSummary(BuildContext context, Map<String, dynamic> matchData) {
     final innings1 = matchData['innings1'] as Map<String, dynamic>;
     final battingTeamName = innings1['battingTeamName'] as String? ?? 'Team 1';
-    final totalRuns = innings1['score'] as int? ?? 0;
-    final wickets = innings1['wickets'] as int? ?? 0;
-    final overs = innings1['overs'] as double? ?? 0.0;
+    final totalRuns = _safeInt(innings1['score']);
+    final wickets = _safeInt(innings1['wickets']);
+    final overs = _safeDouble(innings1['overs']);
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 16),
@@ -275,8 +292,8 @@ class CommentarySection extends StatelessWidget {
     final totalRuns = runsScored?['total']?.toString() ?? '0';
     final isWicket = delivery['isWicket'] == true;
     final extraType = delivery['extraType'] as String?;
-    final overNumber = delivery['overNumber'] as int? ?? 0;
-    final ballInOver = delivery['ballInOver'] as int? ?? 0;
+    final overNumber = _safeInt(delivery['overNumber']);
+    final ballInOver = _safeInt(delivery['ballInOver']);
     
     // Changed this line to remove the padding
     final overAndBall = '$overNumber.$ballInOver';
