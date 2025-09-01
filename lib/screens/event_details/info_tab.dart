@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:khelset/theme/app_theme.dart';
-import 'package:khelset/screens/login_screen.dart';
-import 'package:khelset/screens/registration/team_registration_screen.dart';
 import 'match_card.dart';
 import 'package:khelset/screens/match_details_screen.dart'; // Import the MatchDetailsScreen
 
@@ -22,14 +19,6 @@ class InfoTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final eventName = eventData['eventName'] ?? 'Unnamed Event';
     final location = eventData['location'] ?? 'No Location';
-
-    // --- LOGIC TO CHECK THE DEADLINE ---
-    // Get the deadline from the database data.
-    final deadlineTimestamp = eventData['registrationDeadline'] as Timestamp?;
-    final deadline = deadlineTimestamp?.toDate();
-    // Check if the deadline exists and is in the future.
-    final bool isRegistrationOpen = deadline != null && deadline.isAfter(DateTime.now());
-    // --- END OF LOGIC ---
 
     return ListView(
       padding: const EdgeInsets.all(16.0),
@@ -108,11 +97,70 @@ class InfoTab extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            eventData['description'] ?? "No description/rules provided.",
-            style: const TextStyle(color: Colors.grey, fontSize: 16),
-          ),
+          const SizedBox(height: 16),
+          
+          // Event Description
+          if (eventData['description'] != null && eventData['description'].toString().isNotEmpty) ...[
+            const Text(
+              "Event Description:",
+              style: TextStyle(
+                color: Colors.white70, 
+                fontSize: 16, 
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              eventData['description'],
+              style: const TextStyle(color: Colors.grey, fontSize: 15, height: 1.4),
+            ),
+            const SizedBox(height: 16),
+          ],
+          
+          // Custom Rules Text from rules field
+          if (eventData['rules'] != null && 
+              eventData['rules']['customRulesText'] != null && 
+              eventData['rules']['customRulesText'].toString().isNotEmpty) ...[
+            const Text(
+              "Other Rules / Additional Information:",
+              style: TextStyle(
+                color: Colors.white70, 
+                fontSize: 16, 
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              eventData['rules']['customRulesText'],
+              style: const TextStyle(color: Colors.grey, fontSize: 15, height: 1.4),
+            ),
+            const SizedBox(height: 16),
+          ],
+          
+          // Match Rules (if available)
+          if (eventData['rules'] != null && _hasMatchRules()) ...[
+            const Text(
+              "Match Format:",
+              style: TextStyle(
+                color: Colors.white70, 
+                fontSize: 16, 
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _buildMatchRules(),
+            const SizedBox(height: 16),
+          ],
+          
+          // Show default message if no content
+          if (!_hasRulesContent()) ...[
+            const Text(
+              "No rules or requirements have been provided for this event yet.",
+              style: TextStyle(color: Colors.grey, fontSize: 15, fontStyle: FontStyle.italic),
+            ),
+            const SizedBox(height: 16),
+          ],
+          
           const Divider(color: Colors.grey, height: 40),
           const Text("Match Schedule", style: TextStyle(color: fontColor, fontSize: 20, fontWeight: FontWeight.bold)),
           const SizedBox(height: 10),
@@ -122,45 +170,70 @@ class InfoTab extends StatelessWidget {
     );
   }
 
-  // A new helper widget for the registration button card
-  Widget _buildRegisterButtonCard(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: primaryColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: primaryColor.withOpacity(0.3)),
-      ),
-      child: Column(
+  // Helper method to check if there are match rules to display
+  bool _hasMatchRules() {
+    final rules = eventData['rules'] as Map<String, dynamic>?;
+    if (rules == null) return false;
+    
+    return rules['totalOvers'] != null || 
+           rules['playersPerTeam'] != null || 
+           rules['maxOversPerBowler'] != null;
+  }
+
+  // Helper method to build match rules display
+  Widget _buildMatchRules() {
+    final rules = eventData['rules'] as Map<String, dynamic>? ?? {};
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (rules['totalOvers'] != null) ...[
+          _buildRuleItem("Total Overs", "${rules['totalOvers']} overs per innings"),
+        ],
+        if (rules['playersPerTeam'] != null) ...[
+          _buildRuleItem("Players per Team", "${rules['playersPerTeam']} players"),
+        ],
+        if (rules['maxOversPerBowler'] != null) ...[
+          _buildRuleItem("Max Overs per Bowler", "${rules['maxOversPerBowler']} overs"),
+        ],
+      ],
+    );
+  }
+
+  // Helper method to build individual rule items
+  Widget _buildRuleItem(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: primaryColor,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
+          SizedBox(
+            width: 150,
+            child: Text(
+              "$label:",
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
               ),
-              elevation: 2,
             ),
-            onPressed: () {
-              if (FirebaseAuth.instance.currentUser == null) {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
-              } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => TeamRegistrationScreen(eventId: eventId)),
-                );
-              }
-            },
-            child: const Text(
-              "Register Your Team",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(color: Colors.grey, fontSize: 14),
             ),
           ),
         ],
       ),
     );
+  }
+
+  // Helper method to check if there's any rules content to display
+  bool _hasRulesContent() {
+    return (eventData['description'] != null && eventData['description'].toString().isNotEmpty) ||
+           (eventData['rules'] != null && eventData['rules']['customRulesText'] != null && eventData['rules']['customRulesText'].toString().isNotEmpty) ||
+           _hasMatchRules();
   }
 
   // A new helper widget for the schedule section card
