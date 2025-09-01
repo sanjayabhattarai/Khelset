@@ -42,14 +42,9 @@ class InfoTab extends StatelessWidget {
         _buildRulesCard(),
         const SizedBox(height: 24),
 
-        // --- CONDITIONAL UI SECTION ---
-        // This 'if/else' statement decides what to show based on the deadline.
-        if (isRegistrationOpen)
-          // If registration is open, show the button
-          _buildRegisterButtonCard(context)
-        else
-          // If registration is closed, show the schedule
-          _buildScheduleCard(),
+  // --- CONDITIONAL UI SECTION ---
+  // Only show the schedule, registration handled by floating button in main screen
+  _buildScheduleCard(),
       ],
     );
   }
@@ -114,10 +109,14 @@ class InfoTab extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          const Text(
-            "Details about registration fees, rules, etc. will be displayed here.",
-            style: TextStyle(color: Colors.grey, fontSize: 16, height: 1.5),
+          Text(
+            eventData['description'] ?? "No description/rules provided.",
+            style: const TextStyle(color: Colors.grey, fontSize: 16),
           ),
+          const Divider(color: Colors.grey, height: 40),
+          const Text("Match Schedule", style: TextStyle(color: fontColor, fontSize: 20, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          _buildScheduleList(eventId),
         ],
       ),
     );

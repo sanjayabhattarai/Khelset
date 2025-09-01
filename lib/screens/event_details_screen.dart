@@ -7,6 +7,7 @@ import 'package:khelset/theme/app_theme.dart';
 import 'event_details/fixtures_tab.dart';
 import 'event_details/info_tab.dart';
 import 'event_details/teams_tab.dart';
+import 'registration/team_registration_screen.dart';
 
 class EventDetailsScreen extends StatefulWidget {
   final String eventId;
@@ -115,8 +116,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> with SingleTick
           ),
         ),
       ),
-      // The body now shows a loading indicator until the event data is fetched.
-      body: _isLoading
+  // The body now shows a loading indicator until the event data is fetched.
+  body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
@@ -171,6 +172,21 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> with SingleTick
                     ],
                   ),
                 ),
+      floatingActionButton: (!_isLoading && _eventData != null && _eventData!['registrationDeadline'] != null && DateTime.now().isBefore(_eventData!['registrationDeadline'].toDate()))
+          ? FloatingActionButton.extended(
+              icon: const Icon(Icons.group_add),
+              label: const Text('Register Your Team'),
+              backgroundColor: Colors.green,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TeamRegistrationScreen(eventId: widget.eventId),
+                  ),
+                );
+              },
+            )
+          : null,
     );
   }
 }
