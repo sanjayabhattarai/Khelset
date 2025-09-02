@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'screens/home_screen.dart';
-import 'theme/app_theme.dart'; // ✨ 1. Import your new theme file
+import 'theme/app_theme.dart';
+import 'services/notification_service.dart';
 
 // ✨ 2. The main function is now async to initialize Firebase before the app runs.
 // This is the modern, recommended approach.
@@ -13,6 +14,10 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
+  // Initialize notification service
+  await NotificationService().initialize();
+  
   // Run the app.
   runApp(const MyApp());
 }

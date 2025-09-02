@@ -51,6 +51,15 @@ firebase-debug.*.log
 .firebase/
 firebase_new.json
 
+# Cloud Functions (if added later)
+functions/node_modules/
+functions/.env
+functions/lib/
+
+# Notification sensitive data
+google-services.json.backup
+GoogleService-Info.plist.backup
+
 # Environment variables
 .env
 .env.local
