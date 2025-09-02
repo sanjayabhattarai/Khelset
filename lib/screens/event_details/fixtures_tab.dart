@@ -137,13 +137,16 @@ class MatchCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              Center(
-                child: Text(
-                  formattedDate,
-                  style: const TextStyle(color: subFontColor, fontSize: 14),
+              // Only show date if match is not live
+              if (status != 'Live') ...[
+                Center(
+                  child: Text(
+                    formattedDate,
+                    style: const TextStyle(color: subFontColor, fontSize: 14),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
+                const SizedBox(height: 8),
+              ],
               Center(
                 child: Chip(
                   label: Text(status),
