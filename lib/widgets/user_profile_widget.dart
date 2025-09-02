@@ -363,6 +363,11 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
     final role = widget.userData?['role'] ?? 'user';
     final isOrganizer = role == 'organizer';
     final isDesktop = ResponsiveUtils.isDesktop(context);
+    
+    // Enhanced responsive sizing
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 600;
+    final isVerySmallScreen = screenWidth < 400;
 
     // If user signed in with phone and has no display name, show as "User" and prompt for name
     bool needsNameInput = false;
@@ -384,7 +389,9 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
     }
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(isDesktop ? 32.0 : 20.0),
+      padding: EdgeInsets.all(
+        isDesktop ? 32.0 : (isVerySmallScreen ? 12.0 : (isSmallScreen ? 16.0 : 20.0))
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -404,7 +411,9 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
               border: Border.all(color: primaryColor.withOpacity(0.2)),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(32),
+              padding: EdgeInsets.all(
+                isDesktop ? 32 : (isVerySmallScreen ? 16 : (isSmallScreen ? 20 : 24))
+              ),
               child: Column(
                 children: [
                   // Enhanced Avatar with Glow Effect
@@ -420,7 +429,7 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
                       ],
                     ),
                     child: CircleAvatar(
-                      radius: isDesktop ? 60 : 50,
+                      radius: isDesktop ? 60 : (isVerySmallScreen ? 35 : (isSmallScreen ? 40 : 50)),
                       backgroundColor: primaryColor.withOpacity(0.2),
                       child: Container(
                         decoration: BoxDecoration(
@@ -436,7 +445,7 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
                         ),
                         child: Icon(
                           Icons.person_rounded,
-                          size: isDesktop ? 60 : 50,
+                          size: isDesktop ? 60 : (isVerySmallScreen ? 35 : (isSmallScreen ? 40 : 50)),
                           color: Colors.white,
                         ),
                       ),
@@ -449,7 +458,7 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
                     displayName,
                     style: TextStyle(
                       color: fontColor,
-                      fontSize: isDesktop ? 28 : 24,
+                      fontSize: isDesktop ? 28 : (isVerySmallScreen ? 20 : (isSmallScreen ? 22 : 24)),
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.5,
                     ),
@@ -539,6 +548,8 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
               _buildContactInfoItem(Icons.email_rounded, 'Email Address', email, Colors.green, _addEmailDialog),
             ],
             isDesktop,
+            isVerySmallScreen,
+            isSmallScreen,
           ),
 
           const SizedBox(height: 24),
@@ -555,9 +566,12 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
                 errorColor,
                 _signOut,
                 isDesktop,
+                isVerySmallScreen,
               ),
             ],
             isDesktop,
+            isVerySmallScreen,
+            isSmallScreen,
           ),
 
           const SizedBox(height: 40),
@@ -567,7 +581,7 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
   }
 
   // Modern Info Section
-  Widget _buildModernInfoSection(String title, IconData titleIcon, List<Widget> children, bool isDesktop) {
+  Widget _buildModernInfoSection(String title, IconData titleIcon, List<Widget> children, bool isDesktop, [bool isVerySmallScreen = false, bool isSmallScreen = false]) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -587,7 +601,9 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
         children: [
           // Section Header
           Container(
-            padding: EdgeInsets.all(isDesktop ? 24 : 20),
+            padding: EdgeInsets.all(
+              isDesktop ? 24 : (isVerySmallScreen ? 12 : (isSmallScreen ? 16 : 20))
+            ),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -615,7 +631,7 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
                   title,
                   style: TextStyle(
                     color: fontColor,
-                    fontSize: isDesktop ? 20 : 18,
+                    fontSize: isDesktop ? 20 : (isVerySmallScreen ? 16 : (isSmallScreen ? 17 : 18)),
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.5,
                   ),
@@ -625,7 +641,9 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
           ),
           // Section Content
           Padding(
-            padding: EdgeInsets.all(isDesktop ? 24 : 20),
+            padding: EdgeInsets.all(
+              isDesktop ? 24 : (isVerySmallScreen ? 12 : (isSmallScreen ? 16 : 20))
+            ),
             child: Column(children: children),
           ),
         ],
@@ -714,7 +732,7 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
   }
 
   // Action Tile
-  Widget _buildActionTile(IconData icon, String title, String subtitle, Color color, VoidCallback onTap, bool isDesktop) {
+  Widget _buildActionTile(IconData icon, String title, String subtitle, Color color, VoidCallback onTap, bool isDesktop, [bool isVerySmallScreen = false]) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -723,20 +741,22 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
         border: Border.all(color: Colors.white.withOpacity(0.1)),
       ),
       child: ListTile(
-        contentPadding: EdgeInsets.all(isDesktop ? 20 : 16),
+        contentPadding: EdgeInsets.all(
+          isDesktop ? 20 : (isVerySmallScreen ? 12 : 16)
+        ),
         leading: Container(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(isVerySmallScreen ? 8 : 12),
           decoration: BoxDecoration(
             color: color.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(isVerySmallScreen ? 8 : 12),
           ),
-          child: Icon(icon, color: color, size: 24),
+          child: Icon(icon, color: color, size: isVerySmallScreen ? 20 : 24),
         ),
         title: Text(
           title,
           style: TextStyle(
             color: fontColor,
-            fontSize: 16,
+            fontSize: isVerySmallScreen ? 14 : 16,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -744,7 +764,7 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
           subtitle,
           style: TextStyle(
             color: subFontColor,
-            fontSize: 14,
+            fontSize: isVerySmallScreen ? 12 : 14,
           ),
         ),
         trailing: Icon(

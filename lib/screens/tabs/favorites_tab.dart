@@ -81,181 +81,9 @@ class _FavoritesTabState extends State<FavoritesTab>
             stream: AuthService().authStateChanges,
             builder: (context, authSnapshot) {
               if (!authSnapshot.hasData) {
-                // User not signed in - show modern sign in prompt
-                return AnimatedBuilder(
-                  animation: _animationController,
-                  builder: (context, child) {
-                    return FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: SlideTransition(
-                        position: _slideAnimation,
-                        child: Container(
-                          width: double.infinity,
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Color(0xFF0F0F0F),
-                                Color(0xFF1A1A1A),
-                                Color(0xFF2C2C2C),
-                              ],
-                            ),
-                          ),
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
-                            child: Column(
-                              children: [
-                                const SizedBox(height: 60),
-                              // Logo
-                              Container(
-                                width: 120,
-                                height: 120,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      primaryColor.withOpacity(0.2),
-                                      primaryColor.withOpacity(0.1),
-                                    ],
-                                  ),
-                                  border: Border.all(
-                                    color: primaryColor.withOpacity(0.3),
-                                    width: 2,
-                                  ),
-                                ),
-                                child: Center(
-                                  child: Image.asset(
-                                    'assets/khelset_logo.png',
-                                    width: 60,
-                                    height: 60,
-                                    color: primaryColor,
-                                  ),
-                                ),
-                              ),
-                              
-                              const SizedBox(height: 24),
-                              
-                              // Welcome text
-                              Text(
-                                'Your Favorites Await',
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                              
-                              const SizedBox(height: 12),
-                              
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 32),
-                                child: Text(
-                                  'Sign in to save and manage your favorite cricket events, matches, and tournaments.',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white.withOpacity(0.7),
-                                    height: 1.5,
-                                  ),
-                                ),
-                              ),
-                              
-                              const SizedBox(height: 48),
-                              
-                              // Features preview
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 32),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    _buildFeatureIcon(
-                                      Icons.bookmark_border,
-                                      'Save Events',
-                                    ),
-                                    _buildFeatureIcon(
-                                      Icons.notifications_none,
-                                      'Get Alerts',
-                                    ),
-                                    _buildFeatureIcon(
-                                      Icons.sports_cricket,
-                                      'Track Matches',
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              
-                              const SizedBox(height: 32),
-                              
-                              // Sign in button
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 32),
-                                child: Container(
-                                  width: double.infinity,
-                                  height: 56,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [primaryColor, primaryColor.withOpacity(0.8)],
-                                    ),
-                                    borderRadius: BorderRadius.circular(16),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: primaryColor.withOpacity(0.3),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      borderRadius: BorderRadius.circular(16),
-                                      onTap: () {
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (context) => const LoginScreen(),
-                                          ),
-                                        );
-                                      },
-                                      child: Center(
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.login,
-                                              color: Colors.white,
-                                              size: 20,
-                                            ),
-                                            const SizedBox(width: 12),
-                                            Text(
-                                              'Sign In to Continue',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                );
+                return _buildSignInPrompt();
               }
-
-              // User is signed in - check favorites
+              
               return StreamBuilder<List<String>>(
                 stream: FavoritesService().getFavoriteEventsStream(),
                 builder: (context, favoritesSnapshot) {
@@ -270,62 +98,9 @@ class _FavoritesTabState extends State<FavoritesTab>
                   final favoriteIds = favoritesSnapshot.data ?? [];
                   
                   if (favoriteIds.isEmpty) {
-                    // User has no favorites - show empty state
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.favorite_border,
-                              size: 64,
-                              color: Colors.white54,
-                            ),
-                            const SizedBox(height: 24),
-                            const Text(
-                              'No Favorite Events Yet',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'You don\'t have any favorite events yet. Please add events to your favorites to see them here.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(height: 32),
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                // Call the callback to switch to home tab
-                                if (widget.onSwitchToHome != null) {
-                                  widget.onSwitchToHome!();
-                                }
-                              },
-                              icon: const Icon(Icons.explore),
-                              label: const Text('Browse Events'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: primaryColor,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
+                    return _buildEmptyStatePrompt();
                   }
 
-                  // User has favorites - show them
                   return CustomScrollView(
                     slivers: [
                       SliverPadding(
@@ -351,43 +126,297 @@ class _FavoritesTabState extends State<FavoritesTab>
     );
   }
 
-  Widget _buildSectionTitle(String title, IconData icon, BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon,
-              size: 20,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
+  Widget _buildSignInPrompt() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isSmallScreen = constraints.maxWidth < 600;
+        final isVerySmallScreen = constraints.maxWidth < 400;
+        
+        return AnimatedBuilder(
+          animation: _animationController,
+          builder: (context, child) {
+            return FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFF0F0F0F),
+                        Color(0xFF1A1A1A),
+                        Color(0xFF2C2C2C),
+                      ],
+                    ),
+                  ),
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isSmallScreen ? 16.0 : 24.0,
+                      vertical: isSmallScreen ? 32.0 : 48.0,
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(height: isSmallScreen ? 40.0 : 60.0),
+                        // Logo with responsive size
+                        Container(
+                          width: isSmallScreen ? 100.0 : 140.0,
+                          height: isSmallScreen ? 100.0 : 140.0,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                primaryColor.withOpacity(0.2),
+                                primaryColor.withOpacity(0.1),
+                              ],
+                            ),
+                            border: Border.all(
+                              color: primaryColor.withOpacity(0.3),
+                              width: 2,
+                            ),
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.favorite_border,
+                              size: isSmallScreen ? 40.0 : 60.0,
+                              color: primaryColor,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: isSmallScreen ? 20.0 : 24.0),
+                        Text(
+                          'Your Favorites Await',
+                          style: TextStyle(
+                            fontSize: isSmallScreen ? 22.0 : 28.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            letterSpacing: 0.5,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: isSmallScreen ? 8.0 : 12.0),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isSmallScreen ? 16.0 : 32.0,
+                          ),
+                          child: Text(
+                            'Sign in to save and manage your favorite cricket events, matches, and tournaments.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 14.0 : 16.0,
+                              color: Colors.white.withOpacity(0.7),
+                              height: 1.5,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: isSmallScreen ? 32.0 : 48.0),
+                        // Features preview
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isSmallScreen ? 8.0 : 16.0,
+                          ),
+                          child: isSmallScreen && isVerySmallScreen
+                              ? Column(
+                                  children: [
+                                    _buildFeatureIcon(Icons.bookmark_border, 'Save Events', isSmallScreen),
+                                    SizedBox(height: 16.0),
+                                    _buildFeatureIcon(Icons.notifications_none, 'Get Alerts', isSmallScreen),
+                                    SizedBox(height: 16.0),
+                                    _buildFeatureIcon(Icons.sports_cricket, 'Track Matches', isSmallScreen),
+                                  ],
+                                )
+                              : Wrap(
+                                  alignment: WrapAlignment.center,
+                                  spacing: isSmallScreen ? 16.0 : 24.0,
+                                  runSpacing: isSmallScreen ? 16.0 : 24.0,
+                                  children: [
+                                    _buildFeatureIcon(Icons.bookmark_border, 'Save Events', isSmallScreen),
+                                    _buildFeatureIcon(Icons.notifications_none, 'Get Alerts', isSmallScreen),
+                                    _buildFeatureIcon(Icons.sports_cricket, 'Track Matches', isSmallScreen),
+                                  ],
+                                ),
+                        ),
+                        SizedBox(height: isSmallScreen ? 24.0 : 32.0),
+                        // Sign in button
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isSmallScreen ? 16.0 : 32.0,
+                          ),
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: isSmallScreen ? 50.0 : 56.0,
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => const LoginScreen(),
+                                  ),
+                                );
+                              },
+                              icon: Icon(
+                                Icons.login,
+                                color: Colors.white,
+                                size: isSmallScreen ? 18.0 : 20.0,
+                              ),
+                              label: Text(
+                                'Sign In to Continue',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: isSmallScreen ? 16.0 : 18.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryColor,
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: isSmallScreen ? 16.0 : 24.0,
+                                  vertical: isSmallScreen ? 12.0 : 16.0,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: isSmallScreen ? 24.0 : 32.0),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
-  Widget _buildFeatureIcon(IconData icon, String label) {
+  Widget _buildEmptyStatePrompt() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isSmallScreen = constraints.maxWidth < 600;
+        
+        return Center(
+          child: Padding(
+            padding: EdgeInsets.all(isSmallScreen ? 16.0 : 24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.favorite_border,
+                  size: isSmallScreen ? 48.0 : 64.0,
+                  color: Colors.white54,
+                ),
+                SizedBox(height: isSmallScreen ? 16.0 : 24.0),
+                Text(
+                  'No Favorite Events Yet',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: isSmallScreen ? 20.0 : 24.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: isSmallScreen ? 12.0 : 16.0),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isSmallScreen ? 8.0 : 16.0,
+                  ),
+                  child: Text(
+                    'You don\'t have any favorite events yet. Please add events to your favorites to see them here.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: isSmallScreen ? 14.0 : 16.0,
+                    ),
+                  ),
+                ),
+                SizedBox(height: isSmallScreen ? 24.0 : 32.0),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    if (widget.onSwitchToHome != null) {
+                      widget.onSwitchToHome!();
+                    }
+                  },
+                  icon: Icon(
+                    Icons.explore,
+                    size: isSmallScreen ? 18.0 : 20.0,
+                  ),
+                  label: Text(
+                    'Browse Events',
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 14.0 : 16.0,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isSmallScreen ? 16.0 : 24.0,
+                      vertical: isSmallScreen ? 12.0 : 16.0,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSectionTitle(String title, IconData icon, BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isSmallScreen = constraints.maxWidth < 600;
+        
+        return Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  size: isSmallScreen ? 18.0 : 20.0,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(width: isSmallScreen ? 8.0 : 12.0),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 18.0 : 20.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFeatureIcon(IconData icon, String label, bool isSmallScreen) {
     return Column(
       children: [
         Container(
-          width: 60,
-          height: 60,
+          width: isSmallScreen ? 50.0 : 60.0,
+          height: isSmallScreen ? 50.0 : 60.0,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: primaryColor.withOpacity(0.1),
@@ -399,16 +428,20 @@ class _FavoritesTabState extends State<FavoritesTab>
           child: Icon(
             icon,
             color: primaryColor,
-            size: 24,
+            size: isSmallScreen ? 20.0 : 24.0,
           ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
+        SizedBox(height: isSmallScreen ? 6.0 : 8.0),
+        SizedBox(
+          width: isSmallScreen ? 70.0 : 80.0,
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.8),
+              fontSize: isSmallScreen ? 12.0 : 13.0,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ],

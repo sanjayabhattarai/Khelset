@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../core/constants/app_constants.dart';
-import 'notification_service.dart';
 
 /// Service for managing user's favorite events
 class FavoritesService {
@@ -11,7 +10,7 @@ class FavoritesService {
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Adds an event to user's favorites and subscribes to notifications
+  /// Adds an event to user's favorites
   Future<void> addToFavorites(String eventId) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -26,15 +25,12 @@ class FavoritesService {
         'eventId': eventId,
         'addedAt': FieldValue.serverTimestamp(),
       });
-
-      // Subscribe to notifications for this event
-      await NotificationService().subscribeToEventNotifications(eventId);
     } catch (e) {
       throw Exception('Failed to add to favorites: $e');
     }
   }
 
-  /// Removes an event from user's favorites and unsubscribes from notifications
+  /// Removes an event from user's favorites
   Future<void> removeFromFavorites(String eventId) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -46,9 +42,6 @@ class FavoritesService {
           .collection('favorites')
           .doc(eventId)
           .delete();
-
-      // Unsubscribe from notifications for this event
-      await NotificationService().unsubscribeFromEventNotifications(eventId);
     } catch (e) {
       throw Exception('Failed to remove from favorites: $e');
     }

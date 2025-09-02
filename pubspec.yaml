@@ -33,8 +33,6 @@ dependencies:
 
   firebase_core: ^2.32.0
   firebase_auth: ^4.20.0
-  firebase_messaging: ^14.9.4 # For push notifications
-  flutter_local_notifications: ^17.2.2 # For local notifications
   google_sign_in: ^6.2.1
   cloud_firestore: ^4.17.4 # For database
   intl: ^0.19.0 # For date formatting
