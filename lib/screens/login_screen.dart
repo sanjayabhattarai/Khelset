@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:khelset/services/auth_service.dart';
 import 'package:khelset/theme/app_theme.dart';
 import 'phone_auth_screen.dart';
 
@@ -13,14 +11,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen>
     with TickerProviderStateMixin {
-  final AuthService _authService = AuthService();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _nameController = TextEditingController();
-  
   bool _isLoading = false;
-  bool _isSignUp = false;
-  bool _obscurePassword = true;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -45,42 +36,8 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _nameController.dispose();
     _animationController.dispose();
     super.dispose();
-  }
-
-  void _handleAuthAction(Future<User?> authAction) async {
-    if (mounted) setState(() => _isLoading = true);
-
-    try {
-      final user = await authAction;
-      if (user != null && mounted) {
-        Navigator.of(context).pop();
-      } else if (mounted) {
-        _showErrorSnackBar("Authentication failed. Please try again.");
-      }
-    } catch (e) {
-      if (mounted) {
-        String errorMessage = "Authentication failed. Please try again.";
-        _showErrorSnackBar(errorMessage);
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: errorColor,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
   }
 
   Widget _buildLogo() {
@@ -105,111 +62,7 @@ class _LoginScreenState extends State<LoginScreen>
         'assets/khelset_logo.png',
         height: 60,
         width: 60,
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    bool obscureText = false,
-    TextInputType keyboardType = TextInputType.text,
-    Widget? suffixIcon,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      child: TextFormField(
-        controller: controller,
-        obscureText: obscureText,
-        keyboardType: keyboardType,
-        style: const TextStyle(color: fontColor, fontSize: 16),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: TextStyle(color: subFontColor.withValues(alpha: 0.8)),
-          prefixIcon: Icon(icon, color: primaryColor, size: 20),
-          suffixIcon: suffixIcon,
-          filled: true,
-          fillColor: cardBackgroundColor.withValues(alpha: 0.8),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.3), width: 1),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: primaryColor, width: 2),
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGradientButton({
-    required String text,
-    required VoidCallback onPressed,
-    bool isPrimary = true,
-  }) {
-    return Container(
-      width: double.infinity,
-      height: 56,
-      margin: const EdgeInsets.only(bottom: 16),
-      child: ElevatedButton(
-        onPressed: _isLoading ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          padding: EdgeInsets.zero,
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: isPrimary
-                ? LinearGradient(
-                    colors: [primaryColor, primaryColor.withValues(alpha: 0.8)],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  )
-                : LinearGradient(
-                    colors: [cardBackgroundColor, cardBackgroundColor.withValues(alpha: 0.8)],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: isPrimary
-                ? [
-                    BoxShadow(
-                      color: primaryColor.withValues(alpha: 0.3),
-                      blurRadius: 15,
-                      offset: const Offset(0, 8),
-                    ),
-                  ]
-                : [],
-          ),
-          child: Center(
-            child: _isLoading
-                ? const SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
-                : Text(
-                    text,
-                    style: TextStyle(
-                      color: isPrimary ? Colors.white : fontColor,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-          ),
-        ),
+        color: Colors.white,
       ),
     );
   }
@@ -305,9 +158,11 @@ class _LoginScreenState extends State<LoginScreen>
                               // Logo and Title
                               _buildLogo(),
                               const SizedBox(height: 24),
-                              Text(
-                                _isSignUp ? 'Create Account' : 'Welcome Back',
-                                style: const TextStyle(
+                              
+                              // Welcome Text
+                              const Text(
+                                'Welcome to Khelset',
+                                style: TextStyle(
                                   color: fontColor,
                                   fontSize: 28,
                                   fontWeight: FontWeight.bold,
@@ -315,156 +170,45 @@ class _LoginScreenState extends State<LoginScreen>
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                _isSignUp
-                                    ? 'Join the cricket community'
-                                    : 'Sign in to your account',
+                                'Sign in to continue your cricket journey',
                                 style: TextStyle(
                                   color: subFontColor.withValues(alpha: 0.8),
                                   fontSize: 16,
                                 ),
                               ),
-                              const SizedBox(height: 32),
+                              const SizedBox(height: 40),
 
-                              // Form Fields
-                              if (_isSignUp)
-                                _buildTextField(
-                                  controller: _nameController,
-                                  label: 'Full Name',
-                                  icon: Icons.person_outline,
-                                ),
-                              
-                              _buildTextField(
-                                controller: _emailController,
-                                label: 'Email Address',
-                                icon: Icons.email_outlined,
-                                keyboardType: TextInputType.emailAddress,
-                              ),
-                              
-                              _buildTextField(
-                                controller: _passwordController,
-                                label: 'Password',
-                                icon: Icons.lock_outline,
-                                obscureText: _obscurePassword,
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _obscurePassword
-                                        ? Icons.visibility_outlined
-                                        : Icons.visibility_off_outlined,
-                                    color: subFontColor,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _obscurePassword = !_obscurePassword;
-                                    });
-                                  },
-                                ),
-                              ),
-
-                              const SizedBox(height: 8),
-
-                              // Primary Action Button
-                              _buildGradientButton(
-                                text: _isSignUp ? 'Create Account' : 'Sign In',
-                                onPressed: () => _handleAuthAction(
-                                  _isSignUp
-                                      ? _authService.signUpWithEmailAndPassword(
-                                          _emailController.text.trim(),
-                                          _passwordController.text.trim(),
-                                        )
-                                      : _authService.signInWithEmailAndPassword(
-                                          _emailController.text.trim(),
-                                          _passwordController.text.trim(),
-                                        ),
-                                ),
-                              ),
-
-                              // Toggle Sign In/Sign Up
-                              TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _isSignUp = !_isSignUp;
-                                  });
-                                },
-                                child: RichText(
-                                  text: TextSpan(
-                                    style: TextStyle(color: subFontColor),
-                                    children: [
-                                      TextSpan(
-                                        text: _isSignUp
-                                            ? "Already have an account? "
-                                            : "Don't have an account? ",
-                                      ),
-                                      TextSpan(
-                                        text: _isSignUp ? 'Sign In' : 'Sign Up',
-                                        style: const TextStyle(
-                                          color: primaryColor,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-
-                              const SizedBox(height: 24),
-
-                              // Divider
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Divider(color: Colors.grey.withValues(alpha: 0.3)),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                                    child: Text(
-                                      'or continue with',
-                                      style: TextStyle(
-                                        color: subFontColor.withValues(alpha: 0.8),
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Divider(color: Colors.grey.withValues(alpha: 0.3)),
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 24),
-
-                              // Social Login Buttons
-                              // Google Sign-In temporarily disabled - not working on web due to COOP policies
-                              // _buildSocialButton(
-                              //   text: kIsWeb ? 'Google Sign-In (Web Support Coming Soon)' : 'Continue with Google',
-                              //   imagePath: 'assets/google_logo.png',
-                              //   onPressed: kIsWeb 
-                              //     ? () {
-                              //         ScaffoldMessenger.of(context).showSnackBar(
-                              //           SnackBar(
-                              //             content: Text(
-                              //               'Google Sign-In is temporarily unavailable on web due to browser security policies. Please use email/password authentication.',
-                              //               style: TextStyle(color: Colors.white),
-                              //             ),
-                              //             backgroundColor: Colors.orange,
-                              //             duration: Duration(seconds: 4),
-                              //           ),
-                              //         );
-                              //       }
-                              //     : () => _handleAuthAction(
-                              //         _authService.signInWithGoogle(),
-                              //       ),
-                              // ),
-
+                              // Authentication Options
                               _buildSocialButton(
-                                text: 'Continue with Phone',
+                                text: 'Continue with Phone Number',
                                 imagePath: 'assets/khelset_logo.png',
-                                backgroundColor: cardBackgroundColor,
-                                textColor: fontColor,
+                                backgroundColor: primaryColor,
+                                textColor: Colors.white,
                                 onPressed: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => const PhoneAuthScreen(),
+                                    ),
+                                  );
+                                },
+                              ),
+
+                              _buildSocialButton(
+                                text: 'Continue with Email',
+                                imagePath: 'assets/khelset_logo.png',
+                                backgroundColor: Colors.grey.withValues(alpha: 0.2),
+                                textColor: Colors.grey,
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: const Text('Something went wrong. Please use phone number to authenticate and continue.'),
+                                      backgroundColor: Colors.redAccent,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      duration: const Duration(seconds: 3),
                                     ),
                                   );
                                 },
