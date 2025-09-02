@@ -731,7 +731,7 @@ class _CreateEventTabState extends State<CreateEventTab> with TickerProviderStat
                       const Icon(Icons.launch),
                       SizedBox(width: isSmallScreen ? 8.0 : 12.0),
                       Text(
-                        'Launch Portal',
+                        'Admin Dashboard',
                         style: TextStyle(
                           fontSize: isSmallScreen ? 16.0 : 18.0,
                           fontWeight: FontWeight.w600,
