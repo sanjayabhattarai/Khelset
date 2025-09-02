@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../core/utils/responsive_utils.dart';
+import '../services/favorites_service.dart';
+import '../theme/app_theme.dart';
 import 'event_details_screen.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -136,13 +139,10 @@ class _SearchScreenState extends State<SearchScreen> {
       } else {
         _searchResults = _allData.where((item) {
           final title = item['title']?.toString() ?? '';
-          final subtitle = item['subtitle']?.toString() ?? '';
-          final stats = item['stats']?.toString() ?? '';
           final category = item['category']?.toString() ?? '';
           
-          final matchesQuery = title.toLowerCase().contains(query.toLowerCase()) ||
-              subtitle.toLowerCase().contains(query.toLowerCase()) ||
-              stats.toLowerCase().contains(query.toLowerCase());
+          // Only search in title/name for events, not in descriptions or other fields
+          final matchesQuery = title.toLowerCase().contains(query.toLowerCase());
           
           final matchesFilter = _selectedFilter == 'All' || category == _selectedFilter;
           
@@ -322,7 +322,7 @@ class _SearchScreenState extends State<SearchScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '${_searchResults.length} results found',
+              '${_searchResults.where((result) => result['type'] == 'Event').length} events found',
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.8),
                 fontSize: 16,
@@ -346,92 +346,12 @@ class _SearchScreenState extends State<SearchScreen> {
             itemBuilder: (context, index) {
               final result = _searchResults[index];
               
-              return GestureDetector(
-                onTap: () => _handleItemTap(result),
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: result['color'].withValues(alpha: 0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          result['icon'],
-                          color: result['color'],
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              result['title'],
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              result['subtitle'],
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.7),
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              result['stats'],
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.5),
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: result['color'].withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              result['type'],
-                              style: TextStyle(
-                                color: result['color'],
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            color: Colors.white.withValues(alpha: 0.5),
-                            size: 16,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              );
+              // Only show event cards, skip other types
+              if (result['type'] != 'Event') {
+                return const SizedBox.shrink();
+              }
+              
+              return _buildEventCard(result);
             },
           ),
         ),
@@ -439,21 +359,136 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  void _handleItemTap(Map<String, dynamic> result) {
-    if (result['type'] == 'Event') {
-      // Navigate to event details screen
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => EventDetailsScreen(eventId: result['id']),
+  Widget _buildEventCard(Map<String, dynamic> result) {
+    final eventName = result['title'] ?? 'Unnamed Event';
+    final location = result['rawData']['location'] ?? 'Location not specified';
+    final eventId = result['id'];
+
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      color: cardBackgroundColor,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EventDetailsScreen(eventId: eventId),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              // Event icon
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.event,
+                  color: primaryColor,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              // Event details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      eventName,
+                      style: const TextStyle(
+                        color: fontColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on,
+                          color: subFontColor,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            location,
+                            style: const TextStyle(
+                              color: subFontColor,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              // Favorite button
+              FutureBuilder<bool>(
+                future: FavoritesService().isEventFavorite(eventId),
+                builder: (context, snapshot) {
+                  final isFavorite = snapshot.data ?? false;
+                  return IconButton(
+                    onPressed: () => _toggleFavorite(eventId),
+                    icon: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: isFavorite ? Colors.red : subFontColor,
+                      size: 24,
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _toggleFavorite(String eventId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please sign in to add favorites'),
+          backgroundColor: Colors.orange,
         ),
       );
-    } else if (result['type'] == 'Player') {
-      // For now, show a snackbar for players (you can add player details screen later)
+      return;
+    }
+
+    try {
+      await FavoritesService().toggleFavorite(eventId);
+      // Trigger a rebuild to update the favorite icon
+      setState(() {});
+      
+      final isFavorite = await FavoritesService().isEventFavorite(eventId);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Player details for ${result['title']} coming soon!'),
-          backgroundColor: Colors.blue,
+          content: Text(
+            isFavorite ? 'Added to favorites' : 'Removed from favorites',
+          ),
+          backgroundColor: isFavorite ? Colors.green : Colors.orange,
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error updating favorites: $e'),
+          backgroundColor: Colors.red,
         ),
       );
     }
