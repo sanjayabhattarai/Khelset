@@ -359,6 +359,117 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
+  Widget _buildEventImage(Map<String, dynamic> eventData, double iconSize) {
+    final posterUrl = eventData['posterUrl'] as String?;
+    final sportType = eventData['sportType'] as String? ?? 'cricket';
+    final containerSize = 48.0; // Smaller size for search cards
+    
+    if (posterUrl != null && posterUrl.isNotEmpty) {
+      // Show poster image
+      return Container(
+        width: containerSize,
+        height: containerSize,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: _getSportColor(sportType).withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(11),
+          child: Image.network(
+            posterUrl,
+            width: containerSize,
+            height: containerSize,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Container(
+                width: containerSize,
+                height: containerSize,
+                decoration: BoxDecoration(
+                  color: _getSportColor(sportType).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: Center(
+                  child: SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(_getSportColor(sportType)),
+                    ),
+                  ),
+                ),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) {
+              // Show event icon if poster fails to load
+              return _buildEventIcon(sportType, iconSize);
+            },
+          ),
+        ),
+      );
+    } else {
+      // Show event icon if no poster URL
+      return _buildEventIcon(sportType, iconSize);
+    }
+  }
+
+  Widget _buildEventIcon(String sportType, double iconSize) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _getSportColor(sportType).withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(
+        _getSportIcon(sportType),
+        color: _getSportColor(sportType),
+        size: iconSize,
+      ),
+    );
+  }
+
+  IconData _getSportIcon(String sportType) {
+    switch (sportType.toLowerCase()) {
+      case 'cricket':
+        return Icons.sports_cricket;
+      case 'football':
+        return Icons.sports_football;
+      case 'basketball':
+        return Icons.sports_basketball;
+      case 'tennis':
+        return Icons.sports_tennis;
+      case 'badminton':
+        return Icons.sports_tennis; // Use tennis icon for badminton
+      case 'volleyball':
+        return Icons.sports_volleyball;
+      default:
+        return Icons.event;
+    }
+  }
+
+  Color _getSportColor(String sportType) {
+    switch (sportType.toLowerCase()) {
+      case 'cricket':
+        return const Color(0xFF4CAF50); // Green
+      case 'football':
+        return const Color(0xFF2196F3); // Blue
+      case 'basketball':
+        return const Color(0xFFFF9800); // Orange
+      case 'tennis':
+        return const Color(0xFF9C27B0); // Purple
+      case 'badminton':
+        return const Color(0xFFE91E63); // Pink
+      case 'volleyball':
+        return const Color(0xFF607D8B); // Blue Grey
+      default:
+        return primaryColor;
+    }
+  }
+
   Widget _buildEventCard(Map<String, dynamic> result) {
     final eventName = result['title'] ?? 'Unnamed Event';
     final location = result['rawData']['location'] ?? 'Location not specified';
@@ -385,19 +496,8 @@ class _SearchScreenState extends State<SearchScreen> {
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              // Event icon
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.event,
-                  color: primaryColor,
-                  size: 24,
-                ),
-              ),
+              // Event image/icon
+              _buildEventImage(result['rawData'] ?? {}, 24),
               const SizedBox(width: 16),
               // Event details
               Expanded(

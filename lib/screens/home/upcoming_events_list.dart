@@ -156,6 +156,81 @@ class EventCard extends StatefulWidget {
 class _EventCardState extends State<EventCard> {
   bool isLoading = false;
 
+  Widget _buildEventImage(String sportType, double iconSize) {
+    final posterUrl = widget.eventData['posterUrl'] as String?;
+    final isDesktop = ResponsiveUtils.isDesktop(context);
+    final containerSize = isDesktop ? 64.0 : 56.0;
+    
+    if (posterUrl != null && posterUrl.isNotEmpty) {
+      // Show poster image
+      return Container(
+        width: containerSize,
+        height: containerSize,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(isDesktop ? 16 : 12),
+          border: Border.all(
+            color: _getSportColor(sportType).withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(isDesktop ? 15 : 11),
+          child: Image.network(
+            posterUrl,
+            width: containerSize,
+            height: containerSize,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Container(
+                width: containerSize,
+                height: containerSize,
+                decoration: BoxDecoration(
+                  color: _getSportColor(sportType).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(isDesktop ? 15 : 11),
+                ),
+                child: Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(_getSportColor(sportType)),
+                    ),
+                  ),
+                ),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) {
+              // Show sport icon if poster fails to load
+              return _buildSportIcon(sportType, iconSize, isDesktop);
+            },
+          ),
+        ),
+      );
+    } else {
+      // Show sport icon if no poster URL
+      return _buildSportIcon(sportType, iconSize, isDesktop);
+    }
+  }
+
+  Widget _buildSportIcon(String sportType, double iconSize, bool isDesktop) {
+    return Container(
+      width: isDesktop ? 64.0 : 56.0,
+      height: isDesktop ? 64.0 : 56.0,
+      padding: EdgeInsets.all(isDesktop ? 16 : 12),
+      decoration: BoxDecoration(
+        color: _getSportColor(sportType).withOpacity(0.2),
+        borderRadius: BorderRadius.circular(isDesktop ? 16 : 12),
+      ),
+      child: Icon(
+        _getSportIcon(sportType),
+        color: _getSportColor(sportType),
+        size: iconSize,
+      ),
+    );
+  }
+
   IconData _getSportIcon(String sportType) {
     switch (sportType.toLowerCase()) {
       case 'cricket':
@@ -314,19 +389,8 @@ class _EventCardState extends State<EventCard> {
   ) {
     return Row(
       children: [
-        // Sport Icon with colored background
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: _getSportColor(sportType).withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            _getSportIcon(sportType),
-            color: _getSportColor(sportType),
-            size: iconSize,
-          ),
-        ),
+        // Poster Image or Sport Icon with colored background
+        _buildEventImage(sportType, iconSize),
         const SizedBox(width: 16),
 
         // Event Details
@@ -402,19 +466,8 @@ class _EventCardState extends State<EventCard> {
       children: [
         Row(
           children: [
-            // Sport Icon with colored background
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: _getSportColor(sportType).withOpacity(0.2),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(
-                _getSportIcon(sportType),
-                color: _getSportColor(sportType),
-                size: iconSize,
-              ),
-            ),
+            // Poster Image or Sport Icon with colored background
+            _buildEventImage(sportType, iconSize),
             const SizedBox(width: 20),
             
             Expanded(
