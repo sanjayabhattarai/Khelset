@@ -11,23 +11,6 @@ class ScorecardTab extends StatelessWidget {
     required this.allPlayers,
   });
 
-  // Helper methods for safe type conversion
-  double _safeDouble(dynamic value) {
-    if (value == null) return 0.0;
-    if (value is double) return value;
-    if (value is int) return value.toDouble();
-    if (value is String) return double.tryParse(value) ?? 0.0;
-    return 0.0;
-  }
-
-  int _safeInt(dynamic value) {
-    if (value == null) return 0;
-    if (value is int) return value;
-    if (value is double) return value.toInt();
-    if (value is String) return int.tryParse(value) ?? 0;
-    return 0;
-  }
-
   @override
   Widget build(BuildContext context) {
     final innings1Data = matchData['innings1'] as Map<String, dynamic>?;
@@ -111,7 +94,6 @@ class _MatchSummaryCard extends StatefulWidget {
 }
 
 class __MatchSummaryCardState extends State<_MatchSummaryCard> {
-  // Helper methods for safe type conversion
   double _safeDouble(dynamic value) {
     if (value == null) return 0.0;
     if (value is double) return value;
@@ -133,7 +115,6 @@ class __MatchSummaryCardState extends State<_MatchSummaryCard> {
     final status = widget.matchData['status'] ?? 'Upcoming';
     final innings1 = widget.matchData['innings1'] as Map<String, dynamic>;
     final innings2 = widget.matchData['innings2'] as Map<String, dynamic>;
-    final eventName = widget.matchData['eventName'] ?? "T20 Match";
     final rules = widget.matchData['rules'] as Map<String, dynamic>? ?? {};
     final playersPerTeam = _safeInt(rules['playersPerTeam'] ?? 11);
 
@@ -437,7 +418,6 @@ class _InningsCard extends StatelessWidget {
     required this.teamColor,
   });
 
-  // Helper methods for safe type conversion
   double _safeDouble(dynamic value) {
     if (value == null) return 0.0;
     if (value is double) return value;

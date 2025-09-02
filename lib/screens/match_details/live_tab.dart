@@ -13,23 +13,6 @@ class LiveTab extends StatelessWidget {
     required this.matchId,
   });
 
-  // Helper methods for safe type conversion
-  double _safeDouble(dynamic value) {
-    if (value == null) return 0.0;
-    if (value is double) return value;
-    if (value is int) return value.toDouble();
-    if (value is String) return double.tryParse(value) ?? 0.0;
-    return 0.0;
-  }
-
-  int _safeInt(dynamic value) {
-    if (value == null) return 0;
-    if (value is int) return value;
-    if (value is double) return value.toInt();
-    if (value is String) return int.tryParse(value) ?? 0;
-    return 0;
-  }
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -115,7 +98,6 @@ class _ScoreSummaryCard extends StatelessWidget {
   final Map<String, dynamic> matchData;
   const _ScoreSummaryCard({required this.matchData});
 
-  // Helper methods for safe type conversion
   double _safeDouble(dynamic value) {
     if (value == null) return 0.0;
     if (value is double) return value;
@@ -282,7 +264,6 @@ class _PlayerStatsCard extends StatelessWidget {
   final Map<String, dynamic> matchData;
   const _PlayerStatsCard({required this.matchData});
 
-  // Helper methods for safe type conversion
   double _safeDouble(dynamic value) {
     if (value == null) return 0.0;
     if (value is double) return value;

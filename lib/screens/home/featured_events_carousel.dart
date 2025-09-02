@@ -6,7 +6,6 @@ class FeaturedEventsCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // This is a placeholder for now. Later it can be a real carousel.
     return Container(
       height: 200,
       margin: const EdgeInsets.symmetric(vertical: 10),

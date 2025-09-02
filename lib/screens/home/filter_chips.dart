@@ -6,7 +6,6 @@ class FilterChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // This is a placeholder. Later you can build real filter logic here.
     return Container(
       height: 50,
       margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),

@@ -48,6 +48,13 @@ app.*.map.json
 firebase-debug.log
 firebase-debug.*.log
 *.log
+pglite-debug.log
+
+# Production cleanup
+*.bak
+*.tmp
+*.old
+*.copy
 .firebase/
 firebase_new.json
 
