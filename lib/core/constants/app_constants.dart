@@ -5,7 +5,7 @@ class AppConstants {
   static const String appVersion = '1.0.0';
   
   // URLs
-  static const String organizerPortalUrl = 'https://khelset-organizer.web.app';
+  static const String organizerPortalUrl = 'https://admin.khelset.com';
   static const String supportEmail = 'support@khelset.com';
   static const String privacyPolicyUrl = 'https://khelset.com/privacy';
   static const String termsOfServiceUrl = 'https://khelset.com/terms';

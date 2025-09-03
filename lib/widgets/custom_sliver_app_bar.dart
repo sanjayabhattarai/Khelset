@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/utils/responsive_utils.dart';
 import '../screens/search_screen.dart';
+import '../screens/tabs/notifications_tab.dart';
 
 class CustomSliverAppBar extends StatelessWidget {
   final String title;
@@ -101,8 +102,10 @@ class CustomSliverAppBar extends StatelessWidget {
           icon: Icons.notifications_outlined,
           label: 'Notifications',
           onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Notifications coming soon!')),
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const NotificationsTab(),
+              ),
             );
           },
         ),
@@ -125,8 +128,10 @@ class CustomSliverAppBar extends StatelessWidget {
         IconButton(
           icon: Icon(Icons.notifications_outlined, color: Colors.white.withOpacity(0.9), size: 24),
           onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Notifications coming soon!')),
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const NotificationsTab(),
+              ),
             );
           },
         ),
