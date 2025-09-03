@@ -164,6 +164,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveUtils.isDesktop(context);
+    final isTablet = ResponsiveUtils.isTablet(context);
     
     return Scaffold(
       backgroundColor: const Color(0xFF0F0F0F),
@@ -174,96 +175,352 @@ class _SearchScreenState extends State<SearchScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Search',
-          style: TextStyle(color: Colors.white, fontSize: 20),
+          style: TextStyle(
+            color: Colors.white, 
+            fontSize: isDesktop ? 24 : 20,
+          ),
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(isDesktop ? 24 : 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: isDesktop ? 32 : isTablet ? 24 : 16,
+            vertical: isDesktop ? 24 : 16,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             // Integrated Search Bar
             Container(
-              height: 48,
+              height: isDesktop ? 56 : 48,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white.withOpacity(0.08),
+                    Colors.white.withOpacity(0.12),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(isDesktop ? 28 : 24),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.1),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: TextField(
                 controller: _searchController,
                 focusNode: _searchFocusNode,
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: isDesktop ? 16 : 14,
+                  fontWeight: FontWeight.w400,
+                ),
                 decoration: InputDecoration(
-                  hintText: 'Search players and events...',
-                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
-                  prefixIcon: Icon(Icons.search, color: Colors.white.withValues(alpha: 0.7)),
+                  hintText: isDesktop 
+                      ? 'Search tournaments, events, players...'
+                      : 'Search cricket events...',
+                  hintStyle: TextStyle(
+                    color: Colors.white.withOpacity(0.5),
+                    fontSize: isDesktop ? 16 : 14,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  prefixIcon: Container(
+                    margin: EdgeInsets.only(
+                      left: isDesktop ? 16 : 12,
+                      right: isDesktop ? 12 : 8,
+                    ),
+                    child: Icon(
+                      Icons.search_rounded, 
+                      color: Colors.white.withOpacity(0.6),
+                      size: isDesktop ? 24 : 20,
+                    ),
+                  ),
                   suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: Icon(Icons.clear, color: Colors.white.withValues(alpha: 0.7)),
-                          onPressed: () {
-                            _searchController.clear();
-                            _handleSearch('');
-                          },
+                      ? Container(
+                          margin: EdgeInsets.only(
+                            right: isDesktop ? 12 : 8,
+                          ),
+                          child: IconButton(
+                            icon: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                Icons.close_rounded, 
+                                color: Colors.white.withOpacity(0.7),
+                                size: isDesktop ? 16 : 14,
+                              ),
+                            ),
+                            onPressed: () {
+                              _searchController.clear();
+                              _handleSearch('');
+                            },
+                            splashRadius: 20,
+                          ),
                         )
                       : null,
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: isDesktop ? 20 : 16, 
+                    vertical: isDesktop ? 16 : 12,
+                  ),
                 ),
                 onChanged: (value) {
                   setState(() {}); // Rebuild to show/hide clear button
                   _handleSearch(value);
                 },
               ),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Filter Chips
-            SizedBox(
-              height: 40,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: _filters.length,
-                itemBuilder: (context, index) {
-                  final filter = _filters[index];
-                  final isSelected = _selectedFilter == filter;
-                  
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: FilterChip(
-                      label: Text(
-                        filter,
-                        style: TextStyle(
-                          color: isSelected ? Colors.black : Colors.white,
-                          fontWeight: FontWeight.w500,
+            ),              SizedBox(height: isDesktop ? 20 : 16),
+              
+              // Filter Chips
+              SizedBox(
+                height: isDesktop ? 44 : 40,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _filters.length,
+                  itemBuilder: (context, index) {
+                    final filter = _filters[index];
+                    final isSelected = _selectedFilter == filter;
+                    
+                    return Padding(
+                      padding: EdgeInsets.only(right: isDesktop ? 16 : 12),
+                      child: GestureDetector(
+                        onTap: () => _handleFilterChange(filter),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isDesktop ? 20 : 16,
+                            vertical: isDesktop ? 12 : 8,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: isSelected
+                                ? LinearGradient(
+                                    colors: [
+                                      primaryColor,
+                                      primaryColor.withOpacity(0.8),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  )
+                                : LinearGradient(
+                                    colors: [
+                                      Colors.white.withOpacity(0.08),
+                                      Colors.white.withOpacity(0.04),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                            borderRadius: BorderRadius.circular(isDesktop ? 20 : 16),
+                            border: Border.all(
+                              color: isSelected 
+                                  ? primaryColor.withOpacity(0.3)
+                                  : Colors.white.withOpacity(0.1),
+                              width: 1,
+                            ),
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color: primaryColor.withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (isSelected)
+                                Container(
+                                  margin: const EdgeInsets.only(right: 6),
+                                  child: Icon(
+                                    Icons.check_circle_rounded,
+                                    size: isDesktop ? 16 : 14,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              Text(
+                                filter,
+                                style: TextStyle(
+                                  color: isSelected ? Colors.white : Colors.white.withOpacity(0.8),
+                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                  fontSize: isDesktop ? 14 : 12,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      selected: isSelected,
-                      onSelected: (_) => _handleFilterChange(filter),
-                      backgroundColor: Colors.white.withValues(alpha: 0.1),
-                      selectedColor: Colors.white,
-                      side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
-                      checkmarkColor: Colors.black,
-                    ),
-                  );
+                    );
+                  },
+                ),
+              ),
+              
+              SizedBox(height: isDesktop ? 32 : 24),
+              
+              // Content
+              Expanded(
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                    : !_hasSearched
+                        ? _buildInitialState()
+                        : _searchResults.isEmpty
+                            ? _buildNoResults()
+                            : _buildSearchResults(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInitialState() {
+    final isDesktop = ResponsiveUtils.isDesktop(context);
+    final isTablet = ResponsiveUtils.isTablet(context);
+    
+    return Center(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: isDesktop ? 40 : isTablet ? 32 : 24,
+            vertical: isDesktop ? 32 : 16,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.all(isDesktop ? 24 : isTablet ? 20 : 16),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      primaryColor.withOpacity(0.2),
+                      primaryColor.withOpacity(0.05),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+                child: Icon(
+                  Icons.search,
+                  size: isDesktop ? 56 : isTablet ? 48 : 40,
+                  color: primaryColor,
+                ),
+              ),
+              SizedBox(height: isDesktop ? 32 : isTablet ? 24 : 20),
+              Text(
+                'Discover Cricket',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: isDesktop ? 28 : isTablet ? 24 : 20,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: isDesktop ? 16 : isTablet ? 12 : 10),
+              Text(
+                isDesktop 
+                    ? 'Search for cricket tournaments, events,\nand players from across the community'
+                    : 'Search for cricket tournaments,\nevents, and players',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.7),
+                  fontSize: isDesktop ? 18 : isTablet ? 16 : 14,
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: isDesktop ? 40 : isTablet ? 32 : 24),
+              // Quick search suggestions
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  if (isDesktop) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildSuggestionChip('Cricket Tournament', Icons.emoji_events),
+                        const SizedBox(width: 12),
+                        _buildSuggestionChip('Local League', Icons.groups),
+                        const SizedBox(width: 12),
+                        _buildSuggestionChip('Players', Icons.person),
+                      ],
+                    );
+                  } else {
+                    return Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _buildSuggestionChip('Cricket Tournament', Icons.emoji_events),
+                        _buildSuggestionChip('Local League', Icons.groups),
+                        _buildSuggestionChip('Players', Icons.person),
+                      ],
+                    );
+                  }
                 },
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSuggestionChip(String label, IconData icon) {
+    final isDesktop = ResponsiveUtils.isDesktop(context);
+    final isTablet = ResponsiveUtils.isTablet(context);
+    
+    return InkWell(
+      onTap: () {
+        _searchController.text = label;
+        _handleSearch(label);
+        _searchFocusNode.unfocus();
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: isDesktop ? 16 : isTablet ? 14 : 12,
+          vertical: isDesktop ? 12 : isTablet ? 10 : 8,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(isDesktop ? 20 : 16),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.2),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: isDesktop ? 20 : isTablet ? 18 : 16,
+              color: Colors.white.withOpacity(0.8),
             ),
-            
-            const SizedBox(height: 24),
-            
-            // Content
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator(color: Colors.white))
-                  : !_hasSearched
-                      ? _buildInitialState()
-                      : _searchResults.isEmpty
-                          ? _buildNoResults()
-                          : _buildSearchResults(),
+            SizedBox(width: isDesktop ? 8 : 6),
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.8),
+                  fontSize: isDesktop ? 14 : isTablet ? 13 : 12,
+                  fontWeight: FontWeight.w500,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
@@ -271,45 +528,82 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildInitialState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.search, size: 64, color: Colors.grey),
-          const SizedBox(height: 16),
-          const Text(
-            'Search players and events',
-            style: TextStyle(color: Colors.white, fontSize: 18),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Find cricket players and tournament events\nLoaded ${_allData.length} items from database',
-            style: const TextStyle(color: Colors.grey, fontSize: 14),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildNoResults() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.search_off, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text(
-            'No results found',
-            style: TextStyle(color: Colors.white, fontSize: 18),
+    final isDesktop = ResponsiveUtils.isDesktop(context);
+    final isTablet = ResponsiveUtils.isTablet(context);
+    
+    return Center(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: isDesktop ? 40 : isTablet ? 32 : 24,
+            vertical: isDesktop ? 32 : 16,
           ),
-          Text(
-            'Try different keywords or change filters',
-            style: TextStyle(color: Colors.grey, fontSize: 14),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.all(isDesktop ? 20 : isTablet ? 18 : 16),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.orange.withOpacity(0.1),
+                ),
+                child: Icon(
+                  Icons.search_off,
+                  size: isDesktop ? 56 : isTablet ? 48 : 40,
+                  color: Colors.orange,
+                ),
+              ),
+              SizedBox(height: isDesktop ? 24 : isTablet ? 20 : 16),
+              Text(
+                'No matches found',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: isDesktop ? 24 : isTablet ? 22 : 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: isDesktop ? 12 : isTablet ? 10 : 8),
+              Text(
+                'Try searching with different keywords\nor check your spelling',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.6),
+                  fontSize: isDesktop ? 16 : isTablet ? 15 : 14,
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: isDesktop ? 32 : isTablet ? 24 : 20),
+              // Quick suggestion to clear search
+              TextButton.icon(
+                onPressed: () {
+                  _searchController.clear();
+                  _handleSearch('');
+                  _searchFocusNode.requestFocus();
+                },
+                icon: Icon(
+                  Icons.refresh, 
+                  color: primaryColor,
+                  size: isDesktop ? 20 : 18,
+                ),
+                label: Text(
+                  'Clear search',
+                  style: TextStyle(
+                    color: primaryColor,
+                    fontSize: isDesktop ? 16 : 14,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isDesktop ? 24 : 16,
+                    vertical: isDesktop ? 12 : 8,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
