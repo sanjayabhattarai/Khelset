@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/utils/responsive_utils.dart';
 import '../screens/search_screen.dart';
 import '../screens/tabs/notifications_tab.dart';
+import '../services/notification_service.dart';
 
 class CustomSliverAppBar extends StatelessWidget {
   final String title;
@@ -97,18 +98,7 @@ class CustomSliverAppBar extends StatelessWidget {
           },
         ),
         const SizedBox(width: 12),
-        _buildActionButton(
-          context,
-          icon: Icons.notifications_outlined,
-          label: 'Notifications',
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const NotificationsTab(),
-              ),
-            );
-          },
-        ),
+        _buildNotificationButton(context),
         const SizedBox(width: 8),
       ],
     );
@@ -125,16 +115,7 @@ class CustomSliverAppBar extends StatelessWidget {
             );
           },
         ),
-        IconButton(
-          icon: Icon(Icons.notifications_outlined, color: Colors.white.withOpacity(0.9), size: 24),
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const NotificationsTab(),
-              ),
-            );
-          },
-        ),
+        _buildMobileNotificationButton(),
       ],
     );
   }
@@ -164,6 +145,108 @@ class CustomSliverAppBar extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildNotificationButton(BuildContext context) {
+    return StreamBuilder<int>(
+      stream: NotificationService().getUnreadNotificationCount(),
+      builder: (context, snapshot) {
+        final unreadCount = snapshot.data ?? 0;
+        return Stack(
+          children: [
+            _buildActionButton(
+              context,
+              icon: Icons.notifications_outlined,
+              label: 'Notifications',
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const NotificationsTab(),
+                  ),
+                );
+              },
+            ),
+            if (unreadCount > 0)
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  child: Text(
+                    unreadCount > 99 ? '99+' : unreadCount.toString(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildMobileNotificationButton() {
+    return StreamBuilder<int>(
+      stream: NotificationService().getUnreadNotificationCount(),
+      builder: (context, snapshot) {
+        final unreadCount = snapshot.data ?? 0;
+        return Stack(
+          children: [
+            IconButton(
+              icon: Icon(
+                Icons.notifications_outlined,
+                color: Colors.white.withOpacity(0.9),
+                size: 24,
+              ),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const NotificationsTab(),
+                  ),
+                );
+              },
+            ),
+            if (unreadCount > 0)
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  child: Text(
+                    unreadCount > 99 ? '99+' : unreadCount.toString(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }

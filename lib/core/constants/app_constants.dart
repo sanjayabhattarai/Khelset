@@ -16,6 +16,7 @@ class AppConstants {
   static const String teamsCollection = 'teams';
   static const String playersCollection = 'players';
   static const String matchesCollection = 'matches';
+  static const String notificationsCollection = 'notifications';
   
   // App Settings
   static const int maxPlayersPerTeam = 15;
