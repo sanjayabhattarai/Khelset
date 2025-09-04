@@ -6,6 +6,7 @@ import '../services/auth_service.dart';
 import '../core/utils/error_handler.dart';
 import '../core/constants/app_constants.dart';
 import '../core/utils/responsive_utils.dart';
+import '../screens/home_screen.dart';
 
 /// Modern and professional widget that displays the user profile for authenticated users
 class UserProfileWidget extends StatefulWidget {
@@ -52,7 +53,7 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Please enter your name to complete your profile setup.',
+                'Please enter your name to complete your profile setup. This is required to continue.',
                 style: TextStyle(color: fontColor),
               ),
               const SizedBox(height: 16),
@@ -79,18 +80,19 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                'Skip',
-                style: TextStyle(color: fontColor.withOpacity(0.7)),
-              ),
-            ),
             ElevatedButton(
               onPressed: () async {
-                if (nameController.text.trim().isNotEmpty) {
-                  await _updateUserName(nameController.text.trim());
+                final name = nameController.text.trim();
+                if (name.isNotEmpty) {
+                  await _updateUserName(name);
                   if (mounted) Navigator.of(context).pop();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Please enter your name to continue'),
+                      backgroundColor: errorColor,
+                    ),
+                  );
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -126,10 +128,23 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Profile updated successfully!'),
+            content: Text('Welcome to Khelset! Profile updated successfully!'),
             backgroundColor: successColor,
+            duration: Duration(seconds: 2),
           ),
         );
+
+        // Navigate to Home tab after successful name update
+        // Use a simple approach: post a custom notification
+        Future.delayed(Duration(milliseconds: 500), () {
+          // Find the root navigator and navigate to a fresh HomeScreen with Home tab selected
+          Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => HomeScreen(initialTab: 0), // Start with Home tab
+            ),
+            (route) => false,
+          );
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -369,16 +384,16 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
     final isSmallScreen = screenWidth < 600;
     final isVerySmallScreen = screenWidth < 400;
 
-    // If user signed in with phone and has no display name, show as "User" and prompt for name
+    // If user signed in with phone and has no custom display name, show as "User" and prompt for name
     bool needsNameInput = false;
-    if (displayName.isEmpty || displayName == 'User') {
-      if (phoneNumber.isNotEmpty && email.isEmpty) {
-        // User signed in with phone number
-        displayName = 'User';
-        needsNameInput = true;
-      } else if (displayName.isEmpty) {
-        displayName = 'User';
-      }
+    String? firestoreDisplayName = widget.userData?['displayName'];
+    
+    if (phoneNumber.isNotEmpty && email.isEmpty && (firestoreDisplayName == null || firestoreDisplayName.isEmpty)) {
+      // User signed in with phone number and hasn't set a custom name yet
+      displayName = 'User';
+      needsNameInput = true;
+    } else if (displayName.isEmpty) {
+      displayName = 'User';
     }
 
     // Show name input dialog after build if needed
@@ -494,7 +509,7 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          isOrganizer ? 'Event Organizer' : 'Cricket Player',
+                          isOrganizer ? 'Event Organizer' : 'User',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 14,
