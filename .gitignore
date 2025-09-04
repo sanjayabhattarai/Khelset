@@ -48,6 +48,8 @@ app.*.map.json
 firebase-debug.log
 firebase-debug.*.log
 *.log
+google-services.json
+GoogleService-Info.plist
 pglite-debug.log
 
 # Production cleanup
