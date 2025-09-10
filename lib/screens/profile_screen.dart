@@ -118,7 +118,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Hero(
                         tag: 'logo',
                         child: Image.asset(
-                          'assets/khelset_logo.png',
+                          'assets/Khelset_updated_logo.png',
                           height: isDesktop ? 40 : 36,
                         ),
                       ),

@@ -59,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen>
         ],
       ),
       child: Image.asset(
-        'assets/khelset_logo.png',
+        'assets/Khelset_updated_logo.png',
         height: 60,
         width: 60,
         color: Colors.white,
@@ -181,7 +181,7 @@ class _LoginScreenState extends State<LoginScreen>
                               // Authentication Options
                               _buildSocialButton(
                                 text: 'Continue with Phone Number',
-                                imagePath: 'assets/khelset_logo.png',
+                                imagePath: 'assets/Khelset_updated_logo.png',
                                 backgroundColor: primaryColor,
                                 textColor: Colors.white,
                                 onPressed: () {
@@ -196,7 +196,7 @@ class _LoginScreenState extends State<LoginScreen>
 
                               _buildSocialButton(
                                 text: 'Continue with Email',
-                                imagePath: 'assets/khelset_logo.png',
+                                imagePath: 'assets/Khelset_updated_logo.png',
                                 backgroundColor: Colors.grey.withValues(alpha: 0.2),
                                 textColor: Colors.grey,
                                 onPressed: () {

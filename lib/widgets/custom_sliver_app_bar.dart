@@ -48,8 +48,8 @@ class CustomSliverAppBar extends StatelessWidget {
                 Hero(
                   tag: 'logo',
                   child: Image.asset(
-                    'assets/khelset_logo.png',
-                    height: isDesktop ? 40 : 32,
+                    'assets/khelset_updated_logo.png',
+                    height: isDesktop ? 120 : 84,
                   ),
                 ),
                 // Title

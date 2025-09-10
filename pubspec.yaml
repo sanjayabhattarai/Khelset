@@ -48,10 +48,19 @@ dev_dependencies:
     sdk: flutter
   flutter_launcher_icons: ^0.13.1
 
-flutter_icons:
+flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/khelset_logo.png"
+  web:
+    generate: true
+    image_path: "assets/khelset_app_icon.png"
+  windows:
+    generate: true
+    image_path: "assets/khelset_app_icon.png"
+  macos:
+    generate: true
+    image_path: "assets/khelset_app_icon.png"
+  image_path: "assets/khelset_app_icon.png"
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -74,4 +83,6 @@ flutter:
 
   assets:
     - assets/khelset_logo.png
+    - assets/Khelset_updated_logo.png
+    - assets/khelset_app_icon.png
     - assets/google_logo.png

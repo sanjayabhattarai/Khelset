@@ -153,7 +153,7 @@ class _EmailAuthScreenState extends State<EmailAuthScreen>
         ],
       ),
       child: Image.asset(
-        'assets/khelset_logo.png',
+        'assets/Khelset_updated_logo.png',
         height: 48,
         width: 48,
         color: Colors.white,

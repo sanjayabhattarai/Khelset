@@ -1,7 +1,8 @@
 // lib/screens/phone_auth_screen.dart
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:khelset/theme/app_theme.dart';
+import 'package:khelset/services/phone_auth_service.dart';
+import 'package:khelset/screens/home_screen.dart';
 
 class PhoneAuthScreen extends StatefulWidget {
   const PhoneAuthScreen({super.key});
@@ -14,9 +15,8 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen>
     with TickerProviderStateMixin {
   final _phoneController = TextEditingController();
   final _otpController = TextEditingController();
-  final _auth = FirebaseAuth.instance;
+  final _phoneAuthService = PhoneAuthService();
 
-  String? _verificationId;
   bool _isLoading = false;
   bool _isOtpSent = false;
   late AnimationController _animationController;
@@ -50,57 +50,87 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen>
   }
 
   Future<void> _sendOtp() async {
-    if (_phoneController.text.isEmpty) return;
+    final phoneNumber = _phoneController.text.trim();
+    
+    if (phoneNumber.isEmpty) {
+      _showErrorSnackBar('Please enter a phone number');
+      return;
+    }
+
+    if (!PhoneAuthService.isValidPhoneNumber(phoneNumber)) {
+      _showErrorSnackBar('Please enter a valid phone number with country code (e.g., +977 9876543210)');
+      return;
+    }
+
     setState(() => _isLoading = true);
 
-    await _auth.verifyPhoneNumber(
-      phoneNumber: _phoneController.text.trim(),
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        await _auth.signInWithCredential(credential);
-        if (mounted) Navigator.pop(context);
-      },
-      verificationFailed: (FirebaseAuthException e) {
-        if (mounted) {
-          setState(() => _isLoading = false);
-          _showErrorSnackBar("Failed to send OTP: ${e.message}");
-        }
-      },
-      codeSent: (String verificationId, int? resendToken) {
+    final formattedPhone = PhoneAuthService.formatPhoneNumber(phoneNumber);
+    
+    final success = await _phoneAuthService.sendOTP(
+      phoneNumber: formattedPhone,
+      onCodeSent: (message) {
         if (mounted) {
           setState(() {
-            _verificationId = verificationId;
             _isLoading = false;
             _isOtpSent = true;
           });
+          _showSuccessSnackBar(message);
         }
       },
-      codeAutoRetrievalTimeout: (String verificationId) {
+      onError: (error) {
         if (mounted) {
-          setState(() {
-            _verificationId = verificationId;
-            _isLoading = false;
-          });
+          setState(() => _isLoading = false);
+          _showErrorSnackBar(error);
+        }
+      },
+      onVerificationCompleted: () {
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
         }
       },
     );
+
+    if (!success && mounted) {
+      setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _verifyOtp() async {
-    if (_otpController.text.isEmpty || _verificationId == null) return;
+    final otpCode = _otpController.text.trim();
+    
+    if (otpCode.isEmpty) {
+      _showErrorSnackBar('Please enter the OTP code');
+      return;
+    }
+
+    if (otpCode.length != 6) {
+      _showErrorSnackBar('Please enter a valid 6-digit OTP');
+      return;
+    }
+
     setState(() => _isLoading = true);
 
-    try {
-      final credential = PhoneAuthProvider.credential(
-        verificationId: _verificationId!,
-        smsCode: _otpController.text.trim(),
+    final user = await _phoneAuthService.verifyOTP(
+      otpCode: otpCode,
+      onError: (error) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          _showErrorSnackBar(error);
+        }
+      },
+    );
+
+    if (user != null && mounted) {
+      setState(() => _isLoading = false);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
-      await _auth.signInWithCredential(credential);
-      if (mounted) Navigator.pop(context);
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        _showErrorSnackBar("Invalid OTP. Please try again.");
-      }
+    } else if (mounted) {
+      setState(() => _isLoading = false);
     }
   }
 
@@ -109,6 +139,17 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen>
       SnackBar(
         content: Text(message),
         backgroundColor: errorColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -133,9 +174,10 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen>
           ),
         ],
       ),
-      child: const Icon(
-        Icons.phone_android,
-        size: 40,
+      child: Image.asset(
+        'assets/Khelset_updated_logo.png',
+        height: 50,
+        width: 50,
         color: Colors.white,
       ),
     );
