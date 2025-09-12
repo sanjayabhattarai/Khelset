@@ -342,6 +342,7 @@ class _EventCardState extends State<EventCard> {
     final location = widget.eventData['location'] ?? 'Location not specified';
     final sportType = widget.eventData['sportType'] ?? 'General';
     final isLive = widget.eventData['isLive'] ?? false;
+    final eventStatus = widget.eventData['status'] ?? '';
     final eventId = widget.eventData['documentID'] as String?;
     
     final isDesktop = ResponsiveUtils.isDesktop(context);
@@ -372,10 +373,10 @@ class _EventCardState extends State<EventCard> {
           }
         },
         child: isDesktop ? _buildDesktopLayout(
-          eventName, location, sportType, isLive, eventId, formattedDate, 
+          eventName, location, sportType, isLive, eventStatus, eventId, formattedDate, 
           formattedTime, iconSize, titleFontSize, subtitleFontSize
         ) : _buildMobileLayout(
-          eventName, location, sportType, isLive, eventId, formattedDate, 
+          eventName, location, sportType, isLive, eventStatus, eventId, formattedDate, 
           formattedTime, iconSize, titleFontSize, subtitleFontSize
         ),
       ),
@@ -384,7 +385,7 @@ class _EventCardState extends State<EventCard> {
 
   Widget _buildMobileLayout(
     String eventName, String location, String sportType, bool isLive, 
-    String? eventId, String formattedDate, String formattedTime,
+    String eventStatus, String? eventId, String formattedDate, String formattedTime,
     double iconSize, double titleFontSize, double subtitleFontSize
   ) {
     return Row(
@@ -432,8 +433,11 @@ class _EventCardState extends State<EventCard> {
                 ],
               ),
               const SizedBox(height: 8),
-              _buildInfoRow(Icons.calendar_today, '$formattedDate • $formattedTime', subtitleFontSize),
-              const SizedBox(height: 6),
+              // Only show date if event is not completed
+              if (eventStatus.toLowerCase() != 'complete' && eventStatus.toLowerCase() != 'completed') ...[
+                _buildInfoRow(Icons.calendar_today, '$formattedDate • $formattedTime', subtitleFontSize),
+                const SizedBox(height: 6),
+              ],
               _buildInfoRow(Icons.location_on_outlined, location, subtitleFontSize),
               const SizedBox(height: 6),
               _buildTeamCountRow(eventId, subtitleFontSize),
@@ -458,7 +462,7 @@ class _EventCardState extends State<EventCard> {
 
   Widget _buildDesktopLayout(
     String eventName, String location, String sportType, bool isLive, 
-    String? eventId, String formattedDate, String formattedTime,
+    String eventStatus, String? eventId, String formattedDate, String formattedTime,
     double iconSize, double titleFontSize, double subtitleFontSize
   ) {
     return Column(
@@ -529,10 +533,13 @@ class _EventCardState extends State<EventCard> {
         
         Row(
           children: [
-            Expanded(
-              child: _buildInfoRow(Icons.calendar_today, '$formattedDate • $formattedTime', subtitleFontSize),
-            ),
-            const SizedBox(width: 24),
+            // Only show date if event is not completed
+            if (eventStatus.toLowerCase() != 'complete' && eventStatus.toLowerCase() != 'completed') ...[
+              Expanded(
+                child: _buildInfoRow(Icons.calendar_today, '$formattedDate • $formattedTime', subtitleFontSize),
+              ),
+              const SizedBox(width: 24),
+            ],
             Expanded(
               child: _buildInfoRow(Icons.location_on_outlined, location, subtitleFontSize),
             ),

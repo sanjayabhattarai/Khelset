@@ -137,8 +137,8 @@ class MatchCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              // Only show date if match is not live
-              if (status != 'Live') ...[
+              // Only show date if match is not live or completed
+              if (status != 'Live' && status != 'Complete' && status != 'Completed') ...[
                 Center(
                   child: Text(
                     formattedDate,
