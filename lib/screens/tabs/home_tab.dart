@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+// FontAwesome no longer required here; replaced by asset image
 
 // Import the updated widget files
 import '../home/upcoming_events_list.dart';
@@ -36,7 +36,11 @@ class HomeTab extends StatelessWidget {
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 sliver: SliverToBoxAdapter(
-                  child: _buildSectionTitle("Sports Events", FontAwesomeIcons.trophy, context),
+                  child: _buildSectionTitle(
+                    "Sports Events",
+                    Image.asset('assets/trophy.png', width: 20, height: 20, fit: BoxFit.contain),
+                    context,
+                  ),
                 ),
               ),
               const SliverToBoxAdapter(
@@ -54,7 +58,7 @@ class HomeTab extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title, IconData icon, BuildContext context) {
+  Widget _buildSectionTitle(String title, Widget iconWidget, BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -65,11 +69,7 @@ class HomeTab extends StatelessWidget {
               color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              icon,
-              size: 20,
-              color: Colors.white,
-            ),
+            child: SizedBox(width: 20, height: 20, child: iconWidget),
           ),
           const SizedBox(width: 12),
           Text(

@@ -37,7 +37,6 @@ dependencies:
   cloud_firestore: ^4.17.4 # For database
   intl: ^0.19.0 # For date formatting
   url_launcher: ^6.1.12 # For launching external URLs
-  font_awesome_flutter: ^10.4.0
   google_fonts: ^5.0.0
   firebase_storage: ^11.0.0
 
@@ -85,7 +84,7 @@ flutter:
   uses-material-design: true
 
   assets:
-  - assets/khelset_updated_logo.png
-  - assets/Khelset_updated_logo.png
+  - assets/khelset_logo_v2.png
   - assets/khelset_app_icon.png
   - assets/google_logo.png
+  - assets/trophy.png
