@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 // --- KHELSET BRAND COLORS (From Logo) ---
 const primaryColor = Color(0xFF2E7D32); // Green - Primary brand color
@@ -38,7 +39,10 @@ class AppTheme {
         onPrimary: Colors.white,
         onSecondary: Colors.white,
       ),
-      fontFamily: 'Roboto',
+  // Use Noto Sans as the app font to cover a wide set of glyphs
+  textTheme: GoogleFonts.notoSansTextTheme(),
+  // Keep Roboto as a fallback font family string for legacy widgets
+  fontFamily: 'Roboto',
 
       // --- AppBar Theme ---
       appBarTheme: const AppBarTheme(
@@ -83,19 +87,8 @@ class AppTheme {
         unselectedLabelStyle: TextStyle(fontWeight: FontWeight.normal),
       ),
 
-      // --- Text Theme ---
-      textTheme: const TextTheme(
-        headlineSmall: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: fontColor),
-        titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: fontColor),
-        titleMedium: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: fontColor),
-        titleSmall: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: fontColor),
-        bodyLarge: TextStyle(fontSize: 16, color: fontColor),
-        bodyMedium: TextStyle(fontSize: 14, color: fontColor),
-        bodySmall: TextStyle(fontSize: 12, color: subFontColor),
-        labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: fontColor),
-        labelMedium: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: fontColor),
-        labelSmall: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: subFontColor),
-      ),
+  // The GoogleFonts text theme already sets text styles. We'll merge
+  // our color choices into it below where needed.
 
       // --- Input Decoration Theme ---
       inputDecorationTheme: InputDecorationTheme(

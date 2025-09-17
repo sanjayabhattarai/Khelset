@@ -1,6 +1,7 @@
 // lib/screens/event_details/fixtures_tab.dart
 // This widget is responsible for displaying the list of matches for an event.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
@@ -62,7 +63,7 @@ class MatchCard extends StatelessWidget {
       final doc = await FirebaseFirestore.instance.collection('teams').doc(teamId).get();
       return doc.exists ? doc.data()!['name'] ?? 'Unknown Team' : 'Unknown Team';
     } catch (e) {
-      print("Error fetching team name: $e");
+      if (kDebugMode) print("Error fetching team name: $e");
       return "Error";
     }
   }

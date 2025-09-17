@@ -375,8 +375,6 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
     String displayName = widget.userData?['displayName'] ?? widget.user.displayName ?? '';
     final phoneNumber = widget.userData?['phoneNumber'] ?? widget.user.phoneNumber ?? '';
     final email = widget.userData?['email'] ?? widget.user.email ?? '';
-    final role = widget.userData?['role'] ?? 'user';
-    final isOrganizer = role == 'organizer';
     final isDesktop = ResponsiveUtils.isDesktop(context);
     
     // Enhanced responsive sizing
@@ -481,19 +479,17 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
                   ),
                   const SizedBox(height: 12),
                   
-                  // Enhanced Role Badge
+                  // Simple Role Badge (always show 'User')
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: isOrganizer 
-                          ? [successColor, successColor.withOpacity(0.8)]
-                          : [primaryColor, primaryColor.withOpacity(0.8)],
+                        colors: [primaryColor, primaryColor.withOpacity(0.8)],
                       ),
                       borderRadius: BorderRadius.circular(25),
                       boxShadow: [
                         BoxShadow(
-                          color: (isOrganizer ? successColor : primaryColor).withOpacity(0.3),
+                          color: primaryColor.withOpacity(0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
@@ -502,15 +498,16 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          isOrganizer ? Icons.verified_user_rounded : Icons.sports_cricket_rounded,
-                          color: Colors.white,
-                          size: 16,
+                        Image.asset(
+                          'assets/khelset_app_icon.png',
+                          width: 16,
+                          height: 16,
+                          fit: BoxFit.contain,
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          isOrganizer ? 'Event Organizer' : 'User',
-                          style: const TextStyle(
+                        const Text(
+                          'User',
+                          style: TextStyle(
                             color: Colors.white,
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -520,33 +517,6 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
                       ],
                     ),
                   ),
-                  
-                  if (isOrganizer) ...[
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.amber.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.amber.withOpacity(0.3)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.star_rounded, color: Colors.amber, size: 16),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Premium Member',
-                            style: TextStyle(
-                              color: Colors.amber.shade600,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),

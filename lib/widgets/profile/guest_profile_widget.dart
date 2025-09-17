@@ -82,10 +82,11 @@ class GuestProfileWidget extends StatelessWidget {
                 ),
               ],
             ),
-            child: Icon(
-              Icons.sports_cricket,
-              size: isVerySmallScreen ? 32 : (isSmallScreen ? 40 : 50),
-              color: Colors.white,
+            child: Image.asset(
+              'assets/khelset_app_icon.png',
+              width: isVerySmallScreen ? 32 : (isSmallScreen ? 40 : 50),
+              height: isVerySmallScreen ? 32 : (isSmallScreen ? 40 : 50),
+              fit: BoxFit.contain,
             ),
           ),
           
@@ -280,11 +281,18 @@ class GuestProfileWidget extends StatelessWidget {
               color: primaryColor.withOpacity(0.2),
               borderRadius: BorderRadius.circular(isVerySmallScreen ? 8 : 10),
             ),
-            child: Icon(
-              icon,
-              color: primaryColor,
-              size: isVerySmallScreen ? 16 : (isSmallScreen ? 18 : 20),
-            ),
+            child: (icon == Icons.sports_cricket_rounded || icon == Icons.sports_cricket)
+                ? Image.asset(
+                    'assets/khelset_app_icon.png',
+                    width: isVerySmallScreen ? 16 : (isSmallScreen ? 18 : 20),
+                    height: isVerySmallScreen ? 16 : (isSmallScreen ? 18 : 20),
+                    fit: BoxFit.contain,
+                  )
+                : Icon(
+                    icon,
+                    color: primaryColor,
+                    size: isVerySmallScreen ? 16 : (isSmallScreen ? 18 : 20),
+                  ),
           ),
           
           SizedBox(width: isVerySmallScreen ? 10 : (isSmallScreen ? 12 : 16)),

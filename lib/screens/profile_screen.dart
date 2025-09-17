@@ -9,6 +9,7 @@ import 'package:khelset/widgets/profile/guest_profile_widget.dart';
 import 'package:khelset/widgets/responsive_wrapper.dart';
 import 'package:khelset/core/utils/responsive_utils.dart';
 import '../widgets/user_profile_widget.dart';
+import '../widgets/custom_sliver_app_bar.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -91,120 +92,78 @@ class _ProfileScreenState extends State<ProfileScreen> {
             stops: [0.0, 0.8],
           ),
         ),
-        child: Column(
-          children: [
-            // Fixed Header matching other tabs
-            Container(
-              height: isDesktop ? 80 : 70,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFF121212), Color(0xFF2C2C2C)],
-                  stops: [0.0, 0.8],
-                ),
+        child: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return const [
+              CustomSliverAppBar(
+                title: 'Profile',
+                showSearchAndNotifications: false,
               ),
-              child: SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isDesktop ? 24 : 16,
-                    vertical: 12,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Original color logo
-                      Hero(
-                        tag: 'logo',
-                        child: Image.asset(
-                          'assets/Khelset_updated_logo.png',
-                          height: isDesktop ? 40 : 36,
+            ];
+          },
+          body: ResponsiveWrapper(
+            child: StreamBuilder<User?>(
+              stream: AuthService().authStateChanges,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting || isLoading) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                          strokeWidth: 2,
                         ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        'Profile',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: isDesktop ? 20 : 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Spacer(),
-                      // Empty spacer to center the title
-                      SizedBox(width: isDesktop ? 40 : 36),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: ResponsiveWrapper(
-                child: StreamBuilder<User?>(
-                  stream: AuthService().authStateChanges,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting || isLoading) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
-                              strokeWidth: 2,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Loading your profile...',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-                    
-                    if (snapshot.hasData) {
-                      final user = snapshot.data!;
-                      // Load user data if we don't have it yet
-                      if (userData == null) {
-                        // Schedule the data loading after the current build cycle
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (mounted) {
-                            _loadUserData(user);
-                          }
-                        });
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
-                                strokeWidth: 2,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Setting up your profile...',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
+                        const SizedBox(height: 16),
+                        Text(
+                          'Loading your profile...',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
                           ),
-                        );
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                
+                if (snapshot.hasData) {
+                  final user = snapshot.data!;
+                  // Load user data if we don't have it yet
+                  if (userData == null) {
+                    // Schedule the data loading after the current build cycle
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        _loadUserData(user);
                       }
-                      return _buildUserProfile(context, user);
-                    }
-                    
-                    return _buildGuestProfile(context);
-                  },
-                ),
-              ),
+                    });
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                            strokeWidth: 2,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Setting up your profile...',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  return _buildUserProfile(context, user);
+                }
+                
+                return _buildGuestProfile(context);
+              },
             ),
-          ],
+          ),
         ),
       ),
     );

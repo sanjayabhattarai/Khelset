@@ -160,11 +160,6 @@ class InfoTab extends StatelessWidget {
             ),
             const SizedBox(height: 16),
           ],
-          
-          const Divider(color: Colors.grey, height: 40),
-          const Text("Match Schedule", style: TextStyle(color: fontColor, fontSize: 20, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 10),
-          _buildScheduleList(eventId),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 // lib/screens/event_details_screen.dart
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:khelset/theme/app_theme.dart';
@@ -55,7 +56,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> with SingleTick
          if (mounted) setState(() => _isLoading = false);
       }
     } catch (e) {
-      print("Error fetching event data: $e");
+      if (kDebugMode) print("Error fetching event data: $e");
       if (mounted) setState(() => _isLoading = false);
     }
   }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:khelset/services/data_migration_service.dart';
 import 'package:khelset/services/data_cleanup_service.dart';
@@ -46,7 +47,7 @@ class _DataMigrationScreenState extends State<DataMigrationScreen> {
         _consistencyResult = result;
       });
     } catch (e) {
-      print('Consistency check failed: $e');
+      if (kDebugMode) print('Consistency check failed: $e');
     }
   }
 

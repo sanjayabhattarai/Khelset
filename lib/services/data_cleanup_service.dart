@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DataCleanupService {
@@ -29,7 +30,7 @@ class DataCleanupService {
                                      (teamData['players'] as List).isEmpty);
           
           if (hasPlayerIds && hasEmptyOrNoPlayers) {
-            print('Found team with playerIds but no players: $teamId');
+            if (kDebugMode) print('Found team with playerIds but no players: $teamId');
             
             // Get player documents from separate collection
             final List<dynamic> playerIds = teamData['playerIds'];
@@ -62,7 +63,7 @@ class DataCleanupService {
             });
             
             teamsFixed++;
-            print('Fixed team $teamId with ${playersData.length} players');
+            if (kDebugMode) print('Fixed team $teamId with ${playersData.length} players');
           }
         } catch (e) {
           errors.add('Error processing team ${teamDoc.id}: $e');
@@ -164,7 +165,7 @@ class DataCleanupService {
                                    (teamData['playerIds'] as List).isEmpty;
           
           if (hasEmptyPlayerIds) {
-            print('Found team with empty playerIds: $teamId');
+            if (kDebugMode) print('Found team with empty playerIds: $teamId');
             
             // Find all players for this team in the players collection
             final playersQuery = await _firestore.collection('players')
@@ -183,7 +184,7 @@ class DataCleanupService {
               
               teamsFixed++;
               playersFound += playerIds.length;
-              print('Fixed team $teamId with ${playerIds.length} players');
+              if (kDebugMode) print('Fixed team $teamId with ${playerIds.length} players');
             } else {
               // No players found, remove the empty playerIds field
               await teamDoc.reference.update({
@@ -192,7 +193,7 @@ class DataCleanupService {
                 'fixedEmptyPlayerIds': FieldValue.serverTimestamp(),
               });
               teamsFixed++;
-              print('Fixed team $teamId - removed empty playerIds (no players found)');
+              if (kDebugMode) print('Fixed team $teamId - removed empty playerIds (no players found)');
             }
           }
         } catch (e) {

@@ -1,7 +1,7 @@
 // lib/services/auth_service.dart
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -33,7 +33,7 @@ class AuthService {
       }
       return user;
     } on FirebaseAuthException catch (e) {
-      debugPrint("Sign Up Failed: ${e.message}");
+      if (kDebugMode) debugPrint("Sign Up Failed: ${e.message}");
       return null;
     }
   }
@@ -47,7 +47,7 @@ class AuthService {
       );
       return result.user;
     } on FirebaseAuthException catch (e) {
-      debugPrint("Sign In Failed: ${e.message}");
+      if (kDebugMode) debugPrint("Sign In Failed: ${e.message}");
       return null;
     }
   }
@@ -74,32 +74,32 @@ GoogleSignIn get googleSignIn {
 
 Future<User?> signInWithGoogle() async {
   try {
-    debugPrint("Starting Google Sign-In...");
+  if (kDebugMode) debugPrint("Starting Google Sign-In...");
     
     // For web, try silent sign-in first (for better UX)
     if (kIsWeb) {
       try {
         final GoogleSignInAccount? silentUser = await googleSignIn.signInSilently();
         if (silentUser != null) {
-          debugPrint("Silent sign-in successful");
+          if (kDebugMode) debugPrint("Silent sign-in successful");
           return await _processGoogleUser(silentUser);
         }
       } catch (e) {
-        debugPrint("Silent sign-in failed, proceeding with interactive sign-in");
+        if (kDebugMode) debugPrint("Silent sign-in failed, proceeding with interactive sign-in");
       }
     }
     
     final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
     if (googleUser == null) {
-      debugPrint("User canceled Google Sign-In");
+      if (kDebugMode) debugPrint("User canceled Google Sign-In");
       return null;
     }
 
     return await _processGoogleUser(googleUser);
   } catch (e) {
-    debugPrint("Google Sign In Failed: $e");
+    if (kDebugMode) debugPrint("Google Sign In Failed: $e");
     if (kIsWeb && (e.toString().contains('popup') || e.toString().contains('COOP'))) {
-      debugPrint("Popup blocked or COOP error. This is common in development mode.");
+      if (kDebugMode) debugPrint("Popup blocked or COOP error. This is common in development mode.");
       throw Exception('Google Sign-In popup was blocked. Please allow popups for this site or try email/password login.');
     }
     throw Exception('Google Sign-In failed: ${e.toString()}');
@@ -107,11 +107,11 @@ Future<User?> signInWithGoogle() async {
 }
 
 Future<User?> _processGoogleUser(GoogleSignInAccount googleUser) async {
-  debugPrint("Processing Google user: ${googleUser.email}");
+  if (kDebugMode) debugPrint("Processing Google user: ${googleUser.email}");
   final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
   
   if (googleAuth.accessToken == null && googleAuth.idToken == null) {
-    debugPrint("Failed to get Google authentication tokens");
+    if (kDebugMode) debugPrint("Failed to get Google authentication tokens");
     throw Exception('Failed to get authentication tokens from Google');
   }
   
@@ -120,13 +120,13 @@ Future<User?> _processGoogleUser(GoogleSignInAccount googleUser) async {
     idToken: googleAuth.idToken,
   );
 
-  debugPrint("Signing in with Firebase...");
+  if (kDebugMode) debugPrint("Signing in with Firebase...");
   UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
 
   // After signing in, ensure a user document exists in Firestore
   if (userCredential.user != null) {
     await _createUserDocument(userCredential.user!);
-    debugPrint("Google Sign-In successful!");
+  if (kDebugMode) debugPrint("Google Sign-In successful!");
   }
   
   return userCredential.user;
@@ -143,7 +143,7 @@ Future<void> _createUserDocument(User user) async {
       'role': 'user',
       'createdAt': Timestamp.now(),
     });
-    debugPrint("Created new user document in Firestore");
+  if (kDebugMode) debugPrint("Created new user document in Firestore");
   }
 }
 

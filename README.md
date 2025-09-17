@@ -1,7 +1,7 @@
 # 🏏 Khelset - Cricket Event Management Platform
 
 <div align="center">
-  <img src="assets/khelset_logo.png" alt="Khelset Logo" width="120" height="120">
+   <img src="assets/khelset_updated_logo.png" alt="Khelset Logo" width="120" height="120">
   
   **A comprehensive cricket event management and scoring platform built with Flutter**
   

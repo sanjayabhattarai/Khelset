@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/notification_model.dart';
@@ -23,7 +24,7 @@ class NotificationService {
     try {
       await _notificationsCollection.doc(notification.id).set(notification.toMap());
     } catch (e) {
-      print('Error creating notification: $e');
+      if (kDebugMode) print('Error creating notification: $e');
       rethrow;
     }
   }
@@ -67,7 +68,7 @@ class NotificationService {
         'isRead': true,
       });
     } catch (e) {
-      print('Error marking notification as read: $e');
+      if (kDebugMode) print('Error marking notification as read: $e');
       rethrow;
     }
   }
@@ -89,7 +90,7 @@ class NotificationService {
 
       await batch.commit();
     } catch (e) {
-      print('Error marking all notifications as read: $e');
+      if (kDebugMode) print('Error marking all notifications as read: $e');
       rethrow;
     }
   }
@@ -99,7 +100,7 @@ class NotificationService {
     try {
       await _notificationsCollection.doc(notificationId).delete();
     } catch (e) {
-      print('Error deleting notification: $e');
+      if (kDebugMode) print('Error deleting notification: $e');
       rethrow;
     }
   }
@@ -120,7 +121,7 @@ class NotificationService {
 
       await batch.commit();
     } catch (e) {
-      print('Error deleting all notifications: $e');
+      if (kDebugMode) print('Error deleting all notifications: $e');
       rethrow;
     }
   }
@@ -342,7 +343,7 @@ class NotificationService {
       
       return favoritesQuery.docs.map((doc) => doc.data()['userId'] as String).toList();
     } catch (e) {
-      print('Error getting favorite event users: $e');
+      if (kDebugMode) print('Error getting favorite event users: $e');
       return [];
     }
   }
@@ -358,7 +359,7 @@ class NotificationService {
       
       return participantsQuery.docs.map((doc) => doc.data()['userId'] as String).toList();
     } catch (e) {
-      print('Error getting event participants: $e');
+      if (kDebugMode) print('Error getting event participants: $e');
       return [];
     }
   }
@@ -374,7 +375,7 @@ class NotificationService {
       
       return followersQuery.docs.map((doc) => doc.data()['userId'] as String).toList();
     } catch (e) {
-      print('Error getting match followers: $e');
+      if (kDebugMode) print('Error getting match followers: $e');
       return [];
     }
   }

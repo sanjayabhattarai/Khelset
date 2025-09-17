@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:khelset/core/constants/app_constants.dart';
 
@@ -43,10 +45,10 @@ class ErrorHandler {
   }
   
   static void logError(String error, {StackTrace? stackTrace}) {
-    // For now, just print. Later add Firebase Crashlytics
-    print('ERROR: $error');
-    if (stackTrace != null) {
-      print('STACK TRACE: $stackTrace');
+    // For now, just print in debug builds. Later add Firebase Crashlytics
+    if (kDebugMode) {
+  if (kDebugMode) print('ERROR: $error');
+  if (kDebugMode && stackTrace != null) print('STACK TRACE: $stackTrace');
     }
   }
 }

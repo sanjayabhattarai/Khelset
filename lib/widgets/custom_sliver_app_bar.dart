@@ -10,6 +10,7 @@ class CustomSliverAppBar extends StatelessWidget {
   final Color backgroundColor;
   final List<Color> gradientColors;
   final bool extendBeyondToolbar;
+  final bool showLeading;
 
   const CustomSliverAppBar({
     super.key,
@@ -17,7 +18,8 @@ class CustomSliverAppBar extends StatelessWidget {
     this.showSearchAndNotifications = false,
     this.backgroundColor = const Color(0xFF121212),
     this.gradientColors = const [Color(0xFF121212), Color(0xFF2C2C2C)],
-    this.extendBeyondToolbar = false,
+  this.extendBeyondToolbar = false,
+  this.showLeading = false,
   });
 
   @override
@@ -25,6 +27,7 @@ class CustomSliverAppBar extends StatelessWidget {
     final isDesktop = ResponsiveUtils.isDesktop(context);
     return SliverAppBar(
       backgroundColor: backgroundColor,
+      automaticallyImplyLeading: false,
       elevation: 0,
       pinned: true,
       floating: false,
@@ -44,13 +47,22 @@ class CustomSliverAppBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Logo
-                Hero(
-                  tag: 'logo',
-                  child: Image.asset(
-                    'assets/khelset_updated_logo.png',
-                    height: isDesktop ? 120 : 84,
-                  ),
+                // Leading (optional) + Logo
+                Row(
+                  children: [
+                    if (showLeading)
+                      IconButton(
+                        icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.primary),
+                        onPressed: () => Navigator.of(context).maybePop(),
+                      ),
+                    Hero(
+                      tag: 'logo',
+                      child: Image.asset(
+                        'assets/khelset_updated_logo.png',
+                        height: isDesktop ? 120 : 84,
+                      ),
+                    ),
+                  ],
                 ),
                 // Title
                 Flexible(

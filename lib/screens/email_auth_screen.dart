@@ -1,5 +1,6 @@
 // lib/screens/email_auth_screen.dart
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:khelset/theme/app_theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -103,7 +104,7 @@ class _EmailAuthScreenState extends State<EmailAuthScreen>
         'used': false,
       });
     } catch (e) {
-      debugPrint('Error storing email: $e');
+      if (kDebugMode) debugPrint('Error storing email: $e');
     }
   }
 

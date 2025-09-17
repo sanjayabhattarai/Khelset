@@ -194,11 +194,12 @@ class _CreateEventTabState extends State<CreateEventTab> with TickerProviderStat
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          // Using an icon instead of image asset for simplicity
-                          Icon(
-                            Icons.sports_cricket,
-                            size: isSmallScreen ? 40.0 : 60.0,
-                            color: primaryColor,
+                          // Use app icon asset instead of the cricket icon
+                          Image.asset(
+                            'assets/khelset_app_icon.png',
+                            width: isSmallScreen ? 40.0 : 60.0,
+                            height: isSmallScreen ? 40.0 : 60.0,
+                            fit: BoxFit.contain,
                           ),
                           Positioned(
                             bottom: 12,
@@ -695,7 +696,7 @@ class _CreateEventTabState extends State<CreateEventTab> with TickerProviderStat
                           SizedBox(height: 16.0),
                           _buildPortalFeature(Icons.analytics_outlined, 'Event\nAnalytics', isSmallScreen),
                           SizedBox(height: 16.0),
-                          _buildPortalFeature(Icons.sports_cricket, 'Live\nScoring', isSmallScreen),
+                          _buildPortalFeature(null, 'Live\nScoring', isSmallScreen),
                         ],
                       )
                     : Wrap(
@@ -706,7 +707,7 @@ class _CreateEventTabState extends State<CreateEventTab> with TickerProviderStat
                           _buildPortalFeature(Icons.event_available, 'Create\nEvents', isSmallScreen),
                           _buildPortalFeature(Icons.people_outline, 'Manage\nParticipants', isSmallScreen),
                           _buildPortalFeature(Icons.analytics_outlined, 'Event\nAnalytics', isSmallScreen),
-                          _buildPortalFeature(Icons.sports_cricket, 'Live\nScoring', isSmallScreen),
+                          _buildPortalFeature(null, 'Live\nScoring', isSmallScreen),
                         ],
                       ),
                 SizedBox(height: isSmallScreen ? 24.0 : 32.0),
@@ -749,7 +750,7 @@ class _CreateEventTabState extends State<CreateEventTab> with TickerProviderStat
     );
   }
 
-  Widget _buildPortalFeature(IconData icon, String label, bool isSmallScreen) {
+  Widget _buildPortalFeature(IconData? icon, String label, bool isSmallScreen) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -771,11 +772,18 @@ class _CreateEventTabState extends State<CreateEventTab> with TickerProviderStat
               width: 2,
             ),
           ),
-          child: Icon(
-            icon,
-            color: primaryColor,
-            size: isSmallScreen ? 24.0 : 32.0,
-          ),
+          child: icon == null
+              ? Image.asset(
+                  'assets/khelset_app_icon.png',
+                  width: isSmallScreen ? 24.0 : 32.0,
+                  height: isSmallScreen ? 24.0 : 32.0,
+                  fit: BoxFit.contain,
+                )
+              : Icon(
+                  icon,
+                  color: primaryColor,
+                  size: isSmallScreen ? 24.0 : 32.0,
+                ),
         ),
         SizedBox(height: isSmallScreen ? 8.0 : 12.0),
         Text(

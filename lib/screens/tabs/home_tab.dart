@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 // Import the updated widget files
 import '../home/upcoming_events_list.dart';
@@ -35,7 +36,7 @@ class HomeTab extends StatelessWidget {
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 sliver: SliverToBoxAdapter(
-                  child: _buildSectionTitle("Upcoming Events", Icons.event, context),
+                  child: _buildSectionTitle("Sports Events", FontAwesomeIcons.trophy, context),
                 ),
               ),
               const SliverToBoxAdapter(

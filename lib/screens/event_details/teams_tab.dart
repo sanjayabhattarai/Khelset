@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:khelset/theme/app_theme.dart';
@@ -8,8 +9,7 @@ class TeamsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // This print statement helps us debug by showing the exact ID being used.
-    print("Querying teams for eventId: '$eventId'");
+  if (kDebugMode) print("Querying teams for eventId: '$eventId'");
 
     return StreamBuilder<QuerySnapshot>(
       // We use eventId directly here.
@@ -22,8 +22,8 @@ class TeamsTab extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          print("Firestore Error: ${snapshot.error}");
-          return const Center(child: Text("Something went wrong. Check debug console."));
+          if (kDebugMode) print("Firestore Error: ${snapshot.error}");
+          return const Center(child: Text("Something went wrong."));
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return const Center(

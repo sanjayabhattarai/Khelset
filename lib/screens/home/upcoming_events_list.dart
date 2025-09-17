@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:khelset/theme/app_theme.dart';
+import '../../services/storage_service.dart';
 import '../../services/favorites_service.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/responsive_wrapper.dart';
@@ -17,17 +18,6 @@ class UpcomingEventsList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Text(
-            'Upcoming Events',
-            style: TextStyle(
-              color: fontColor,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
         StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('events')
@@ -160,58 +150,65 @@ class _EventCardState extends State<EventCard> {
     final posterUrl = widget.eventData['posterUrl'] as String?;
     final isDesktop = ResponsiveUtils.isDesktop(context);
     final containerSize = isDesktop ? 64.0 : 56.0;
-    
     if (posterUrl != null && posterUrl.isNotEmpty) {
-      // Show poster image
-      return Container(
-        width: containerSize,
-        height: containerSize,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(isDesktop ? 16 : 12),
-          border: Border.all(
-            color: _getSportColor(sportType).withOpacity(0.3),
-            width: 1,
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(isDesktop ? 15 : 11),
-          child: Image.network(
-            posterUrl,
-            width: containerSize,
-            height: containerSize,
-            fit: BoxFit.cover,
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return Container(
-                width: containerSize,
-                height: containerSize,
-                decoration: BoxDecoration(
-                  color: _getSportColor(sportType).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(isDesktop ? 15 : 11),
+      return FutureBuilder<String?>(
+        future: StorageService.instance.resolveUrl(posterUrl),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Container(
+              width: containerSize,
+              height: containerSize,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(isDesktop ? 16 : 12),
+                border: Border.all(
+                  color: _getSportColor(sportType).withOpacity(0.3),
+                  width: 1,
                 ),
-                child: Center(
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(_getSportColor(sportType)),
-                    ),
+              ),
+              child: Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(_getSportColor(sportType)),
                   ),
                 ),
-              );
-            },
-            errorBuilder: (context, error, stackTrace) {
-              // Show sport icon if poster fails to load
-              return _buildSportIcon(sportType, iconSize, isDesktop);
-            },
-          ),
-        ),
+              ),
+            );
+          }
+
+          final resolved = snapshot.data;
+          if (resolved == null || resolved.isEmpty) {
+            return _buildSportIcon(sportType, iconSize, isDesktop);
+          }
+
+          return Container(
+            width: containerSize,
+            height: containerSize,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(isDesktop ? 16 : 12),
+              border: Border.all(
+                color: _getSportColor(sportType).withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(isDesktop ? 15 : 11),
+              child: Image.network(
+                resolved,
+                width: containerSize,
+                height: containerSize,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => _buildSportIcon(sportType, iconSize, isDesktop),
+              ),
+            ),
+          );
+        },
       );
-    } else {
-      // Show sport icon if no poster URL
-      return _buildSportIcon(sportType, iconSize, isDesktop);
     }
+
+    return _buildSportIcon(sportType, iconSize, isDesktop);
   }
 
   Widget _buildSportIcon(String sportType, double iconSize, bool isDesktop) {

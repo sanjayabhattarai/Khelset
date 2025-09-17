@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../core/utils/responsive_utils.dart';
 import '../services/favorites_service.dart';
+import '../services/storage_service.dart';
 import '../theme/app_theme.dart';
 import 'event_details_screen.dart';
 
@@ -51,12 +53,10 @@ class _SearchScreenState extends State<SearchScreen> {
       final events = results[0];
       final players = results[1];
 
-      print('Loaded ${events.length} events and ${players.length} players');
-      if (events.isNotEmpty) {
-        print('First event: ${events.first['title']}');
-      }
-      if (players.isNotEmpty) {
-        print('First player: ${players.first['title']}');
+      if (kDebugMode) {
+        print('Loaded ${events.length} events and ${players.length} players');
+        if (events.isNotEmpty) print('First event: ${events.first['title']}');
+        if (players.isNotEmpty) print('First player: ${players.first['title']}');
       }
 
       setState(() {
@@ -64,7 +64,7 @@ class _SearchScreenState extends State<SearchScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading data: $e');
+  if (kDebugMode) print('Error loading data: $e');
       setState(() => _isLoading = false);
     }
   }
@@ -76,14 +76,14 @@ class _SearchScreenState extends State<SearchScreen> {
           .collection('events')
           .get();
       
-      print('Events collection query returned ${snapshot.docs.length} documents');
+  if (kDebugMode) print('Events collection query returned ${snapshot.docs.length} documents');
       
       return snapshot.docs.map((doc) {
         final data = doc.data();
         // Use either 'name' or 'eventName' field
         final eventTitle = data['name'] ?? data['eventName'] ?? 'Unknown Event';
         
-        print('Event found: $eventTitle');
+  if (kDebugMode) print('Event found: $eventTitle');
         
         return {
           'id': doc.id,
@@ -100,7 +100,7 @@ class _SearchScreenState extends State<SearchScreen> {
         };
       }).toList();
     } catch (e) {
-      print('Error fetching events: $e');
+  if (kDebugMode) print('Error fetching events: $e');
       return [];
     }
   }
@@ -126,7 +126,7 @@ class _SearchScreenState extends State<SearchScreen> {
         'rawData': doc.data(),
       }).toList();
     } catch (e) {
-      print('Error fetching players: $e');
+  if (kDebugMode) print('Error fetching players: $e');
       return [];
     }
   }
@@ -659,56 +659,62 @@ class _SearchScreenState extends State<SearchScreen> {
     final containerSize = 48.0; // Smaller size for search cards
     
     if (posterUrl != null && posterUrl.isNotEmpty) {
-      // Show poster image
-      return Container(
-        width: containerSize,
-        height: containerSize,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: _getSportColor(sportType).withOpacity(0.3),
-            width: 1,
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(11),
-          child: Image.network(
-            posterUrl,
-            width: containerSize,
-            height: containerSize,
-            fit: BoxFit.cover,
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return Container(
-                width: containerSize,
-                height: containerSize,
-                decoration: BoxDecoration(
-                  color: _getSportColor(sportType).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(11),
+      return FutureBuilder<String?>(
+        future: StorageService.instance.resolveUrl(posterUrl),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Container(
+              width: containerSize,
+              height: containerSize,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: _getSportColor(sportType).withOpacity(0.3),
+                  width: 1,
                 ),
-                child: Center(
-                  child: SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(_getSportColor(sportType)),
-                    ),
+              ),
+              child: Center(
+                child: SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(_getSportColor(sportType)),
                   ),
                 ),
-              );
-            },
-            errorBuilder: (context, error, stackTrace) {
-              // Show event icon if poster fails to load
-              return _buildEventIcon(sportType, iconSize);
-            },
-          ),
-        ),
+              ),
+            );
+          }
+
+          final resolved = snapshot.data;
+          if (resolved == null || resolved.isEmpty) return _buildEventIcon(sportType, iconSize);
+
+          return Container(
+            width: containerSize,
+            height: containerSize,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _getSportColor(sportType).withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(11),
+              child: Image.network(
+                resolved,
+                width: containerSize,
+                height: containerSize,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => _buildEventIcon(sportType, iconSize),
+              ),
+            ),
+          );
+        },
       );
-    } else {
-      // Show event icon if no poster URL
-      return _buildEventIcon(sportType, iconSize);
     }
+
+    return _buildEventIcon(sportType, iconSize);
   }
 
   Widget _buildEventIcon(String sportType, double iconSize) {
