@@ -59,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen>
         ],
       ),
       child: Image.asset(
-        'assets/Khelset_updated_logo.png',
+        'assets/khelset_updated_logo.png',
         height: 60,
         width: 60,
         color: Colors.white,
@@ -181,7 +181,7 @@ class _LoginScreenState extends State<LoginScreen>
                               // Authentication Options
                               _buildSocialButton(
                                 text: 'Continue with Phone Number',
-                                imagePath: 'assets/Khelset_updated_logo.png',
+                                imagePath: 'assets/khelset_updated_logo.png',
                                 backgroundColor: primaryColor,
                                 textColor: Colors.white,
                                 onPressed: () {
@@ -194,25 +194,26 @@ class _LoginScreenState extends State<LoginScreen>
                                 },
                               ),
 
-                              _buildSocialButton(
-                                text: 'Continue with Email',
-                                imagePath: 'assets/Khelset_updated_logo.png',
-                                backgroundColor: Colors.grey.withValues(alpha: 0.2),
-                                textColor: Colors.grey,
-                                onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: const Text('Something went wrong. Please use phone number to authenticate and continue.'),
-                                      backgroundColor: Colors.redAccent,
-                                      behavior: SnackBarBehavior.floating,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      duration: const Duration(seconds: 3),
-                                    ),
-                                  );
-                                },
-                              ),
+                              // Email auth temporarily hidden — using phone authentication only
+                              // _buildSocialButton(
+                              //   text: 'Continue with Email',
+                              //   imagePath: 'assets/khelset_updated_logo.png',
+                              //   backgroundColor: Colors.grey.withValues(alpha: 0.2),
+                              //   textColor: Colors.grey,
+                              //   onPressed: () {
+                              //     ScaffoldMessenger.of(context).showSnackBar(
+                              //       SnackBar(
+                              //         content: const Text('Something went wrong. Please use phone number to authenticate and continue.'),
+                              //         backgroundColor: Colors.redAccent,
+                              //         behavior: SnackBarBehavior.floating,
+                              //         shape: RoundedRectangleBorder(
+                              //           borderRadius: BorderRadius.circular(12),
+                              //         ),
+                              //         duration: const Duration(seconds: 3),
+                              //       ),
+                              //     );
+                              //   },
+                              // ),
                             ],
                           ),
                         ),

@@ -649,7 +649,7 @@ Widget _buildBatsmanRow(BuildContext context, Map<String, dynamic> player) {
                   player['name'] ?? 'Player',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: isOut ? FontWeight.normal : FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
+                    color: Colors.white,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -663,6 +663,7 @@ Widget _buildBatsmanRow(BuildContext context, Map<String, dynamic> player) {
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
         ),
@@ -670,21 +671,30 @@ Widget _buildBatsmanRow(BuildContext context, Map<String, dynamic> player) {
           child: Text(
             balls.toString(),
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontSize: 14,
+              color: Colors.white,
+            ),
           ),
         ),
         Expanded(
           child: Text(
             fours.toString(),
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontSize: 14,
+              color: Colors.white,
+            ),
           ),
         ),
         Expanded(
           child: Text(
             sixes.toString(),
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontSize: 14,
+              color: Colors.white,
+            ),
           ),
         ),
         Expanded(
@@ -693,6 +703,7 @@ Widget _buildBatsmanRow(BuildContext context, Map<String, dynamic> player) {
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
+              color: Colors.white,
             ),
           ),
         ),
@@ -743,7 +754,7 @@ Widget _buildBowlerRow(BuildContext context, Map<String, dynamic> player) {
             player['name'] ?? 'Player',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
+              color: Colors.white,
             ),
             overflow: TextOverflow.ellipsis,
           ),
@@ -754,6 +765,7 @@ Widget _buildBowlerRow(BuildContext context, Map<String, dynamic> player) {
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
         ),
@@ -761,14 +773,20 @@ Widget _buildBowlerRow(BuildContext context, Map<String, dynamic> player) {
           child: Text(
             maidens.toString(),
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontSize: 14,
+              color: Colors.white,
+            ),
           ),
         ),
         Expanded(
           child: Text(
             runsConceded.toString(),
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontSize: 14,
+              color: Colors.white,
+            ),
           ),
         ),
         Expanded(
@@ -777,6 +795,7 @@ Widget _buildBowlerRow(BuildContext context, Map<String, dynamic> player) {
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
         ),
@@ -786,6 +805,7 @@ Widget _buildBowlerRow(BuildContext context, Map<String, dynamic> player) {
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
+              color: Colors.white,
             ),
           ),
         ),

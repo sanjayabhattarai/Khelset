@@ -85,6 +85,7 @@ flutter:
 
   assets:
   - assets/khelset_logo_v2.png
+  - assets/khelset_updated_logo.png
   - assets/khelset_app_icon.png
   - assets/google_logo.png
   - assets/trophy.png

@@ -52,6 +52,7 @@ class SquadsTab extends StatelessWidget {
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
             fontSize: isMobile ? 16 : 20,
+            color: Colors.white,
           ),
         ),
         childrenPadding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 24, vertical: 8),
@@ -73,9 +74,7 @@ class SquadsTab extends StatelessWidget {
         Text(
           sectionTitle,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            color: sectionTitle == "PLAYING XI"
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.secondary,
+            color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: isMobile ? 14 : 16,
           ),
@@ -147,7 +146,7 @@ class SquadsTab extends StatelessWidget {
               children: [
                 Icon(
                   Icons.person,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                  color: Colors.white.withOpacity(0.9),
                   size: isMobile ? 22 : 28,
                 ),
                 if (isWicketkeeper)
@@ -182,7 +181,7 @@ class SquadsTab extends StatelessWidget {
                 Text(
                   displayName,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
+                    color: Colors.white,
                     fontWeight: FontWeight.w600,
                     fontSize: isMobile ? 13 : 16,
                   ),
@@ -193,7 +192,7 @@ class SquadsTab extends StatelessWidget {
                 Text(
                   displayRole,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    color: Colors.white.withOpacity(0.8),
                     fontSize: isMobile ? 11 : 13,
                   ),
                 ),
@@ -202,7 +201,7 @@ class SquadsTab extends StatelessWidget {
           ),
           Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+            color: Colors.white.withOpacity(0.6),
             size: isMobile ? 18 : 22,
           ),
         ],

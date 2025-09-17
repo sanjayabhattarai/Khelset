@@ -175,7 +175,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen>
         ],
       ),
       child: Image.asset(
-        'assets/Khelset_updated_logo.png',
+        'assets/khelset_updated_logo.png',
         height: 50,
         width: 50,
         color: Colors.white,

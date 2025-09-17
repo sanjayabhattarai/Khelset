@@ -181,7 +181,7 @@ class _ScoreSummaryCard extends StatelessWidget {
                         text: '$score',
                         style: Theme.of(context).textTheme.displaySmall?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onSurface,
+                          color: Colors.white,
                           fontSize: 36,
                         ),
                       ),
@@ -202,7 +202,7 @@ class _ScoreSummaryCard extends StatelessWidget {
                   child: Text(
                     '(${overs.toStringAsFixed(1)} ov)',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                      color: Colors.white.withOpacity(0.8),
                     ),
                   ),
                 ),
@@ -247,9 +247,9 @@ class _ScoreSummaryCard extends StatelessWidget {
               child: Text(
                 over.toString(),
                 style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                 ),
               ),
             );
@@ -417,7 +417,7 @@ class _PlayerStatsCard extends StatelessWidget {
     final fours = batsman['fours'] ?? 0;
     final sixes = batsman['sixes'] ?? 0;
     final sr = balls > 0 ? ((runs / balls) * 100).toStringAsFixed(1) : "0.0";
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Row(
@@ -441,7 +441,7 @@ class _PlayerStatsCard extends StatelessWidget {
                     batsman['name'] ?? 'Player',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: Colors.white,
                       fontSize: 14,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -457,6 +457,7 @@ class _PlayerStatsCard extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
+                color: Colors.white,
               ),
             ),
           ),
@@ -466,6 +467,7 @@ class _PlayerStatsCard extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontSize: 14,
+                color: Colors.white,
               ),
             ),
           ),
@@ -475,6 +477,7 @@ class _PlayerStatsCard extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontSize: 14,
+                color: Colors.white,
               ),
             ),
           ),
@@ -484,6 +487,7 @@ class _PlayerStatsCard extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontSize: 14,
+                color: Colors.white,
               ),
             ),
           ),
@@ -494,6 +498,7 @@ class _PlayerStatsCard extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
+                color: Colors.white,
               ),
             ),
           ),
@@ -501,7 +506,6 @@ class _PlayerStatsCard extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildBowlerRow(BuildContext context, Map<String, dynamic> bowler) {
     final overs = _safeDouble(bowler['overs']);
     final maidens = _safeInt(bowler['maidens']);
@@ -519,7 +523,7 @@ class _PlayerStatsCard extends StatelessWidget {
               bowler['name'] ?? 'Player',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface,
+                color: Colors.white,
                 fontSize: 14,
               ),
               overflow: TextOverflow.ellipsis,
@@ -532,6 +536,7 @@ class _PlayerStatsCard extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
+                color: Colors.white,
               ),
             ),
           ),
@@ -541,6 +546,7 @@ class _PlayerStatsCard extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontSize: 14,
+                color: Colors.white,
               ),
             ),
           ),
@@ -550,6 +556,7 @@ class _PlayerStatsCard extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontSize: 14,
+                color: Colors.white,
               ),
             ),
           ),
@@ -560,6 +567,7 @@ class _PlayerStatsCard extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
+                color: Colors.white,
               ),
             ),
           ),
@@ -570,6 +578,7 @@ class _PlayerStatsCard extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
+                color: Colors.white,
               ),
             ),
           ),
