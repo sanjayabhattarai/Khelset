@@ -31,6 +31,10 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Privacy Policy URL for Play Store compliance -->
+        <meta-data
+            android:name="privacy_policy_url"
+            android:value="https://khelset-new.web.app/privacy-policy" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

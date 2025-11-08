@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import '../core/utils/error_handler.dart';
@@ -369,6 +370,90 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
     }
   }
 
+  Future<void> _openPrivacyPolicy() async {
+    const privacyPolicyUrl = 'https://khelset.com/privacy-policy';
+    try {
+      final uri = Uri.parse(privacyPolicyUrl);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        if (mounted) {
+          ErrorHandler.showError(
+            context,
+            'Could not open Privacy Policy. Please visit: $privacyPolicyUrl',
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ErrorHandler.showError(
+          context,
+          'Error opening Privacy Policy: $e',
+        );
+      }
+    }
+  }
+
+  Future<void> _contactEmailSupport() async {
+    const email = 'info@trinovatech.fi';
+    final uri = Uri(
+      scheme: 'mailto',
+      path: email,
+      query: 'subject=Khelset Support Request',
+    );
+    
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        if (mounted) {
+          ErrorHandler.showError(
+            context,
+            'Could not open email app. Please email us at: $email',
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ErrorHandler.showError(
+          context,
+          'Error opening email: $e',
+        );
+      }
+    }
+  }
+
+  Future<void> _contactPhoneSupport() async {
+    const phoneNumber = '+358407017910';
+    final uri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        if (mounted) {
+          ErrorHandler.showError(
+            context,
+            'Could not open phone app. Please call: $phoneNumber',
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ErrorHandler.showError(
+          context,
+          'Error opening phone: $e',
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Enhanced display name logic
@@ -559,8 +644,101 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
             isSmallScreen,
           ),
 
+          const SizedBox(height: 16),
+
+          // Help & Support - Compact Section
+          _buildCompactSupportSection(isDesktop, isVerySmallScreen),
+
           const SizedBox(height: 40),
         ],
+      ),
+    );
+  }
+
+  // Compact Help & Support Section
+  Widget _buildCompactSupportSection(bool isDesktop, bool isVerySmallScreen) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(isDesktop ? 16 : (isVerySmallScreen ? 10 : 12)),
+      decoration: BoxDecoration(
+        color: cardBackgroundColor.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: primaryColor.withOpacity(0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.help_outline_rounded, color: primaryColor.withOpacity(0.7), size: 18),
+              const SizedBox(width: 8),
+              Text(
+                'Help & Support',
+                style: TextStyle(
+                  color: fontColor.withOpacity(0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildCompactButton(
+                icon: Icons.privacy_tip_outlined,
+                label: 'Privacy Policy',
+                onTap: _openPrivacyPolicy,
+              ),
+              _buildCompactButton(
+                icon: Icons.email_outlined,
+                label: 'Email Support',
+                onTap: _contactEmailSupport,
+              ),
+              _buildCompactButton(
+                icon: Icons.phone_outlined,
+                label: 'Call Support',
+                onTap: _contactPhoneSupport,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: primaryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: primaryColor.withOpacity(0.2)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: primaryColor, size: 16),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: fontColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
