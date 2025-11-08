@@ -6,6 +6,9 @@ class SquadsTab extends StatelessWidget {
   final String teamBId;
   final String teamAName;
   final String teamBName;
+  final List<String> playingXITeamA;
+  final List<String> playingXITeamB;
+  final String status;
 
   const SquadsTab({
     super.key,
@@ -14,16 +17,33 @@ class SquadsTab extends StatelessWidget {
     required this.teamBId,
     required this.teamAName,
     required this.teamBName,
+    required this.playingXITeamA,
+    required this.playingXITeamB,
+    required this.status,
   });
 
   @override
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> teamAPlayers = allPlayers.where((p) => p['teamId'] == teamAId).toList();
     final List<Map<String, dynamic>> teamBPlayers = allPlayers.where((p) => p['teamId'] == teamBId).toList();
-    final List<Map<String, dynamic>> teamAPlayingXI = teamAPlayers.take(11).toList();
-    final List<Map<String, dynamic>> teamABench = teamAPlayers.skip(11).toList();
-    final List<Map<String, dynamic>> teamBPlayingXI = teamBPlayers.take(11).toList();
-    final List<Map<String, dynamic>> teamBBench = teamBPlayers.skip(11).toList();
+    
+    // Only split into Playing XI and Bench if match is Live
+    final bool shouldSplitSquad = status == 'Live';
+    
+    // Filter Playing XI based on playingXI_teamA and playingXI_teamB arrays from Firebase
+    final List<Map<String, dynamic>> teamAPlayingXI = shouldSplitSquad
+        ? teamAPlayers.where((player) => playingXITeamA.contains(player['id'])).toList()
+        : teamAPlayers;
+    final List<Map<String, dynamic>> teamABench = shouldSplitSquad
+        ? teamAPlayers.where((player) => !playingXITeamA.contains(player['id'])).toList()
+        : [];
+    
+    final List<Map<String, dynamic>> teamBPlayingXI = shouldSplitSquad
+        ? teamBPlayers.where((player) => playingXITeamB.contains(player['id'])).toList()
+        : teamBPlayers;
+    final List<Map<String, dynamic>> teamBBench = shouldSplitSquad
+        ? teamBPlayers.where((player) => !playingXITeamB.contains(player['id'])).toList()
+        : [];
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -43,6 +63,8 @@ class SquadsTab extends StatelessWidget {
   }
 
   Widget _buildTeamExpansion(BuildContext context, String teamName, List<Map<String, dynamic>> playingXI, List<Map<String, dynamic>> bench, bool isMobile) {
+    final bool shouldSplitSquad = status == 'Live';
+    
     return Card(
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -57,7 +79,7 @@ class SquadsTab extends StatelessWidget {
         ),
         childrenPadding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 24, vertical: 8),
         children: [
-          _buildSquadSection(context, "PLAYING XI", playingXI, isMobile),
+          _buildSquadSection(context, shouldSplitSquad ? "PLAYING XI" : "SQUAD", playingXI, isMobile),
           if (bench.isNotEmpty) ...[
             const SizedBox(height: 12),
             _buildSquadSection(context, "BENCH", bench, isMobile),

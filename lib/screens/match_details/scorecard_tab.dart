@@ -122,6 +122,7 @@ class __MatchSummaryCardState extends State<_MatchSummaryCard> {
     final team2Name = innings2['battingTeamName'] ?? 'Team 2';
     
     String resultMessage = "Match in progress...";
+    
     if (status == 'Completed') {
       final score1 = innings1['score'] ?? 0;
       final score2 = innings2['score'] ?? 0;
@@ -134,6 +135,10 @@ class __MatchSummaryCardState extends State<_MatchSummaryCard> {
       } else {
         resultMessage = "Match Tied";
       }
+    } else if (status == 'Upcoming' || status == 'Scheduled') {
+      resultMessage = "Match yet to start";
+    } else if (status == 'Live') {
+      resultMessage = "Match in progress...";
     }
 
     return Padding(
@@ -141,17 +146,17 @@ class __MatchSummaryCardState extends State<_MatchSummaryCard> {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: status == 'Completed'
                   ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
                   : Colors.amber.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               resultMessage,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
                 color: status == 'Completed'
                     ? Theme.of(context).colorScheme.primary
                     : Colors.amber.shade800,
