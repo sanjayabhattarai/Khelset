@@ -2,6 +2,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:khelset/theme/app_theme.dart';
 
 // Import the new, separate FixturesTab widget.
@@ -9,6 +10,7 @@ import 'event_details/fixtures_tab.dart';
 import 'event_details/info_tab.dart';
 import 'event_details/teams_tab.dart';
 import 'registration/team_registration_screen.dart';
+import 'login_screen.dart';
 
 class EventDetailsScreen extends StatefulWidget {
   final String eventId;
@@ -174,18 +176,121 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> with SingleTick
                   ),
                 ),
       floatingActionButton: (!_isLoading && _eventData != null && _eventData!['registrationDeadline'] != null && DateTime.now().isBefore(_eventData!['registrationDeadline'].toDate()))
-          ? FloatingActionButton.extended(
-              icon: const Icon(Icons.group_add),
-              label: const Text('Register Your Team'),
-              backgroundColor: Colors.green,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => TeamRegistrationScreen(eventId: widget.eventId),
+          ? Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF00C853), Color(0xFF00E676)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00C853).withOpacity(0.5),
+                    blurRadius: 15,
+                    offset: const Offset(0, 5),
                   ),
-                );
-              },
+                ],
+              ),
+              child: FloatingActionButton.extended(
+                elevation: 0,
+                highlightElevation: 0,
+                backgroundColor: Colors.transparent,
+                icon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.group_add_rounded,
+                    size: 24,
+                    color: Colors.white,
+                  ),
+                ),
+                label: const Text(
+                  'Register Your Team',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                onPressed: () {
+                  // Check if user is logged in before allowing registration
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user == null) {
+                    // Show dialog prompting user to login
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          backgroundColor: cardBackgroundColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          title: Row(
+                            children: [
+                              Icon(Icons.lock_outline, color: primaryColor),
+                              const SizedBox(width: 12),
+                              const Text(
+                                'Login Required',
+                                style: TextStyle(color: fontColor),
+                              ),
+                            ],
+                          ),
+                          content: const Text(
+                            'You need to be logged in to register your team. Please login or create an account to continue.',
+                            style: TextStyle(color: fontColor),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(color: fontColor.withOpacity(0.7)),
+                              ),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(); // Close dialog
+                                // Navigate directly to the Login screen
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const LoginScreen(),
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text(
+                                'Login',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                    return;
+                  }
+                  
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TeamRegistrationScreen(eventId: widget.eventId),
+                    ),
+                  );
+                },
+              ),
             )
           : null,
     );
