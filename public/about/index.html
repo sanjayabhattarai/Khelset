@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="About Khelset - Learn about our mission to revolutionize cricket scoring and team management.">
+    <title>About - Khelset</title>
+    <link rel="canonical" href="https://khelset.com/about/">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        nav {
+            background: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        nav .logo img {
+            height: 40px;
+            width: auto;
+        }
+
+        nav .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        nav .nav-links a {
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav .nav-links a:hover {
+            color: #00C853;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: center;
+            gap: 40px;
+            padding: 80px 20px;
+        }
+
+        .hero-text h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: white;
+            line-height: 1.2;
+        }
+
+        .hero-text p {
+            font-size: 1.2em;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 30px;
+        }
+
+        .hero-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .cta-btn {
+            display: inline-block;
+            background: #00C853;
+            color: white;
+            padding: 16px 40px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+            transition: all 0.3s;
+            margin-right: 15px;
+        }
+
+        .cta-btn:hover {
+            background: #00963e;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 200, 83, 0.3);
+        }
+
+        .cta-btn-red {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            padding: 16px 40px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+            transition: all 0.3s;
+        }
+
+        .cta-btn-red:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(231, 76, 60, 0.3);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin: 40px 0 20px;
+        }
+
+        p {
+            margin-bottom: 20px;
+            line-height: 1.8;
+            font-size: 1.1em;
+            color: #546e7a;
+        }
+
+        .highlight {
+            background: white;
+            color: #2c3e50;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 40px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .highlight h2 {
+            color: #2c3e50;
+        }
+
+        .highlight p {
+            color: #546e7a;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature-item {
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .feature-item h3 {
+            color: #00C853;
+            margin-bottom: 10px;
+        }
+
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 60px;
+        }
+
+        footer a {
+            color: #00C853;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .hero-text h1 {
+                font-size: 2.2em;
+            }
+
+            nav .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="/" class="logo">
+                <img src="/assets/khelset_logo_v2.png" alt="Khelset Logo">
+            </a>
+            <ul class="nav-links">
+                <li><a href="/home/">Home</a></li>
+                <li><a href="/about/">About</a></li>
+                <li><a href="/contact/">Contact</a></li>
+                <li><a href="/">Launch App</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>About Khelset</h1>
+                <p>We're on a mission to revolutionize cricket scoring and team management, making it simple, fast, and accessible for everyone.</p>
+                <a href="/nplseason2/" class="cta-btn-red">Watch NPL Live Scoring</a>
+            </div>
+            <div class="hero-image">
+                <img src="/assets/khelset_app_icon.png" alt="About Khelset">
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <h2>Our Story</h2>
+
+        <p>Khelset is a comprehensive cricket scoring and team management platform designed to simplify the way cricket enthusiasts track matches, manage teams, and organize tournaments.</p>
+
+        <div class="highlight">
+            <h2>Our Mission</h2>
+            <p>To make cricket scoring and team management accessible, easy, and enjoyable for everyone - from local club matches to organized tournaments.</p>
+        </div>
+
+        <h2>What We Offer</h2>
+        <p>Khelset provides a complete suite of tools for cricket enthusiasts:</p>
+
+        <div class="features-grid">
+            <div class="feature-item">
+                <h3>🏏 Live Scoring</h3>
+                <p>Real-time ball-by-ball scoring with comprehensive statistics and commentary.</p>
+            </div>
+
+            <div class="feature-item">
+                <h3>👥 Team Management</h3>
+                <p>Create, organize, and manage cricket teams with player profiles and roles.</p>
+            </div>
+
+            <div class="feature-item">
+                <h3>🏆 Tournament System</h3>
+                <p>Organize tournaments with fixtures, schedules, and automatic standings.</p>
+            </div>
+
+            <div class="feature-item">
+                <h3>📊 Statistics</h3>
+                <p>Detailed player and team statistics with career records and performance analytics.</p>
+            </div>
+        </div>
+
+        <h2>Our Story</h2>
+        <p>Khelset was born from a passion for cricket and a need for better tools to manage local cricket matches and tournaments. We understand the challenges of manually tracking scores, managing team rosters, and organizing cricket events.</p>
+
+        <p>Our team has worked to create a platform that combines the best of modern technology with the traditional spirit of cricket. Whether you're scoring a friendly match or organizing a competitive tournament, Khelset provides the tools you need.</p>
+
+        <h2>Technology</h2>
+        <p>Built with modern web technologies and available on multiple platforms, Khelset ensures your cricket data is always accessible, whether you're on your phone, tablet, or computer. Our cloud-based infrastructure ensures real-time synchronization and reliable performance.</p>
+
+        <h2>Join Our Community</h2>
+        <p>Khelset is more than just an app - it's a community of cricket lovers who share a passion for the game. Join thousands of users who are already using Khelset to enhance their cricket experience.</p>
+
+        <p>Ready to get started? <a href="https://khelset-new.web.app" style="color: #00C853; font-weight: bold;">Launch the app</a> or <a href="/contact/" style="color: #00C853; font-weight: bold;">contact us</a> to learn more.</p>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Khelset. All rights reserved.</p>
+        <p style="margin-top: 20px;">
+            <a href="/home/">Home</a> | 
+            <a href="/about/">About</a> | 
+            <a href="/contact/">Contact</a> | 
+            <a href="/privacy-policy/">Privacy Policy</a> | 
+            <a href="/terms/">Terms of Service</a>
+        </p>
+    </footer>
+</body>
+</html>

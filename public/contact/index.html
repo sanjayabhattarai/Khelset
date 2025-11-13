@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Contact Khelset - Get in touch with our support team for help with cricket scoring and team management.">
+    <title>Contact Us - Khelset</title>
+    <link rel="canonical" href="https://khelset.com/contact/">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #2c3e50;
+            background: #f8f9fa;
+        }
+
+        nav {
+            background: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        nav .logo img {
+            height: 40px;
+            width: auto;
+        }
+
+        nav ul {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        nav a {
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        nav a:hover {
+            color: #00C853;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: center;
+            gap: 40px;
+            padding: 80px 20px;
+        }
+
+        .hero-text h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: white;
+            line-height: 1.2;
+        }
+
+        .hero-text p {
+            font-size: 1.2em;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 30px;
+        }
+
+        .hero-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .contact-card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        .contact-icon {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .contact-card h3 {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .contact-card a {
+            color: #00C853;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .contact-card a:hover {
+            text-decoration: underline;
+        }
+
+        .contact-card p {
+            color: #546e7a;
+            line-height: 1.6;
+        }
+
+        .info-section {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 40px;
+        }
+
+        .info-section h2 {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .info-section p {
+            color: #546e7a;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .info-section a {
+            color: #00C853;
+            text-decoration: none;
+        }
+
+        .info-section a:hover {
+            text-decoration: underline;
+        }
+
+        .faq-section {
+            margin-top: 40px;
+        }
+
+        .faq-section h2 {
+            font-size: 2em;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .faq-item {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        .faq-item h3 {
+            font-size: 1.2em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .faq-item p {
+            color: #546e7a;
+            line-height: 1.6;
+        }
+
+        footer {
+            background: #2c3e50;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        footer a {
+            color: #00E676;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .hero-text h1 {
+                font-size: 2.2em;
+            }
+
+            nav ul {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="/" class="logo">
+                <img src="/assets/khelset_logo_v2.png" alt="Khelset Logo">
+            </a>
+            <ul>
+                <li><a href="/home/">Home</a></li>
+                <li><a href="/about/">About</a></li>
+                <li><a href="/contact/">Contact</a></li>
+                <li><a href="/">Launch App</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="header">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Get in Touch</h1>
+                <p>We're here to help with any questions or support. Reach out to us and we'll respond as soon as possible.</p>
+            </div>
+            <div class="hero-image">
+                <img src="/assets/khelset_app_icon.png" alt="Contact Khelset">
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="contact-grid">
+            <div class="contact-card">
+                <div class="contact-icon">📧</div>
+                <h3>Email Support</h3>
+                <p>Send us an email anytime</p>
+                <a href="mailto:khelset.com@gmail.com">khelset.com@gmail.com</a>
+            </div>
+
+            <div class="contact-card">
+                <div class="contact-icon">📞</div>
+                <h3>Phone</h3>
+                <p>Call us during business hours</p>
+                <a href="tel:+358407017910">+358 40 701 7910</a>
+            </div>
+
+            <div class="contact-card">
+                <div class="contact-icon">🌐</div>
+                <h3>Web App</h3>
+                <p>Access Khelset directly</p>
+                <a href="/">Launch App</a>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2>Business Information</h2>
+            <p><strong>Location:</strong> Helsinki, Finland</p>
+            <p><strong>Email:</strong> <a href="mailto:khelset.com@gmail.com">khelset.com@gmail.com</a></p>
+            <p><strong>Phone:</strong> <a href="tel:+358407017910">+358 40 701 7910</a></p>
+            <p><strong>Support Hours:</strong> Monday - Friday, 9:00 AM - 6:00 PM (EET)</p>
+        </div>
+
+        <div class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <h3>How do I create a team?</h3>
+                <p>After logging in, navigate to the Teams section and click "Create Team". Fill in your team details and add players to get started.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>Can I score matches offline?</h3>
+                <p>Yes, Khelset works offline. Your match data will sync automatically when you reconnect to the internet.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>Is Khelset free to use?</h3>
+                <p>Yes, Khelset is completely free to use. All features including live scoring, team management, and tournaments are available at no cost.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>Which platforms are supported?</h3>
+                <p>Khelset is available on Android (Google Play Store) and Web Browser. Your data syncs seamlessly across all devices.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>How do I report a bug or suggest a feature?</h3>
+                <p>Email us at khelset.com@gmail.com with your feedback, bug reports, or feature suggestions. We appreciate your input!</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div>
+            <a href="/home/">Home</a>
+            <a href="/about/">About</a>
+            <a href="/contact/">Contact</a>
+            <a href="/privacy-policy/">Privacy Policy</a>
+            <a href="/terms/">Terms</a>
+        </div>
+        <p style="margin-top: 20px;">&copy; 2025 Khelset. All rights reserved.</p>
+    </footer>
+</body>
+</html>
