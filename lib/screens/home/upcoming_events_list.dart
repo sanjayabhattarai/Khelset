@@ -21,7 +21,6 @@ class UpcomingEventsList extends StatelessWidget {
         StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('events')
-              .orderBy('date')
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -115,23 +114,77 @@ class UpcomingEventsList extends StatelessWidget {
 
             final events = snapshot.data!.docs;
 
-            // Use responsive grid layout
-            return ResponsiveGrid(
-              mobileColumns: 1,
-              tabletColumns: 2,
-              desktopColumns: 2,
-              spacing: 16,
-              runSpacing: 16,
-              children: events.map((eventDoc) {
-                final eventData = eventDoc.data() as Map<String, dynamic>;
-                eventData['documentID'] = eventDoc.id;
-                return EventCard(eventData: eventData);
-              }).toList(),
+            // Sort events by popularity (favorite count)
+            return FutureBuilder<List<DocumentSnapshot>>(
+              future: _sortEventsByPopularity(events),
+              builder: (context, sortedSnapshot) {
+                if (sortedSnapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(24.0),
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                      ),
+                    ),
+                  );
+                }
+
+                final sortedEvents = sortedSnapshot.data ?? events;
+
+                // Use responsive grid layout
+                return ResponsiveGrid(
+                  mobileColumns: 1,
+                  tabletColumns: 2,
+                  desktopColumns: 2,
+                  spacing: 16,
+                  runSpacing: 16,
+                  children: sortedEvents.map((eventDoc) {
+                    final eventData = eventDoc.data() as Map<String, dynamic>;
+                    eventData['documentID'] = eventDoc.id;
+                    return EventCard(eventData: eventData);
+                  }).toList(),
+                );
+              },
             );
           },
         ),
       ],
     );
+  }
+
+  // Sort events by number of registered teams
+  Future<List<DocumentSnapshot>> _sortEventsByPopularity(List<QueryDocumentSnapshot> events) async {
+    // Get team counts for all events
+    final Map<String, int> teamCounts = {};
+    
+    for (var event in events) {
+      final count = await _getTeamCount(event.id);
+      teamCounts[event.id] = count;
+    }
+
+    // Sort events by team count (most teams first)
+    final sortedEvents = List<DocumentSnapshot>.from(events);
+    sortedEvents.sort((a, b) {
+      final countA = teamCounts[a.id] ?? 0;
+      final countB = teamCounts[b.id] ?? 0;
+      return countB.compareTo(countA); // Descending order (most teams first)
+    });
+
+    return sortedEvents;
+  }
+
+  // Get the number of teams registered for this event
+  Future<int> _getTeamCount(String eventId) async {
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('teams')
+          .where('eventId', isEqualTo: eventId)
+          .get();
+      
+      return querySnapshot.docs.length;
+    } catch (e) {
+      return 0;
+    }
   }
 }
 

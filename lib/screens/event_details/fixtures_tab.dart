@@ -37,11 +37,57 @@ class FixturesTab extends StatelessWidget {
         }
         
         final matches = matchSnapshot.data!.docs;
+        
+        // Sort matches: Live matches first, then by date (earliest first)
+        final sortedMatches = List<DocumentSnapshot>.from(matches);
+        sortedMatches.sort((a, b) {
+          final dataA = a.data() as Map<String, dynamic>;
+          final dataB = b.data() as Map<String, dynamic>;
+          
+          final statusA = dataA['status'] ?? '';
+          final statusB = dataB['status'] ?? '';
+          
+          // Live matches always come first
+          final isLiveA = statusA == 'Live';
+          final isLiveB = statusB == 'Live';
+          
+          if (isLiveA && !isLiveB) return -1;
+          if (!isLiveA && isLiveB) return 1;
+          
+          // For non-live matches, sort by scheduled time (earliest first)
+          // Safely handle scheduledTime field
+          Timestamp? timeA;
+          Timestamp? timeB;
+          
+          try {
+            final fieldA = dataA['scheduledTime'];
+            if (fieldA is Timestamp) {
+              timeA = fieldA;
+            }
+          } catch (e) {
+            if (kDebugMode) print('Error parsing timeA: $e');
+          }
+          
+          try {
+            final fieldB = dataB['scheduledTime'];
+            if (fieldB is Timestamp) {
+              timeB = fieldB;
+            }
+          } catch (e) {
+            if (kDebugMode) print('Error parsing timeB: $e');
+          }
+          
+          if (timeA == null && timeB == null) return 0;
+          if (timeA == null) return 1;
+          if (timeB == null) return -1;
+          
+          return timeA.compareTo(timeB); // Ascending order (earliest first)
+        });
 
         return ListView.builder(
-          itemCount: matches.length,
+          itemCount: sortedMatches.length,
           itemBuilder: (context, index) {
-            final matchDoc = matches[index];
+            final matchDoc = sortedMatches[index];
             return MatchCard(matchDoc: matchDoc);
           },
         );

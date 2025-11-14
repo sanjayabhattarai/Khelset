@@ -371,7 +371,7 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
   }
 
   Future<void> _openPrivacyPolicy() async {
-    const privacyPolicyUrl = 'https://khelset.com/privacy-policy';
+    const privacyPolicyUrl = 'https://khelset.com/privacy-policy/';
     try {
       final uri = Uri.parse(privacyPolicyUrl);
       if (await canLaunchUrl(uri)) {
@@ -397,22 +397,20 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
     }
   }
 
-  Future<void> _contactEmailSupport() async {
-    const email = 'info@trinovatech.fi';
-    final uri = Uri(
-      scheme: 'mailto',
-      path: email,
-      query: 'subject=Khelset Support Request',
-    );
-    
+  Future<void> _openTermsAndConditions() async {
+    const termsUrl = 'https://khelset.com/terms/';
     try {
+      final uri = Uri.parse(termsUrl);
       if (await canLaunchUrl(uri)) {
-        await launchUrl(uri);
+        await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
       } else {
         if (mounted) {
           ErrorHandler.showError(
             context,
-            'Could not open email app. Please email us at: $email',
+            'Could not open Terms & Conditions. Please visit: $termsUrl',
           );
         }
       }
@@ -420,27 +418,26 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
       if (mounted) {
         ErrorHandler.showError(
           context,
-          'Error opening email: $e',
+          'Error opening Terms & Conditions: $e',
         );
       }
     }
   }
 
-  Future<void> _contactPhoneSupport() async {
-    const phoneNumber = '+358407017910';
-    final uri = Uri(
-      scheme: 'tel',
-      path: phoneNumber,
-    );
-    
+  Future<void> _openAboutUs() async {
+    const aboutUrl = 'https://khelset.com/about/';
     try {
+      final uri = Uri.parse(aboutUrl);
       if (await canLaunchUrl(uri)) {
-        await launchUrl(uri);
+        await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
       } else {
         if (mounted) {
           ErrorHandler.showError(
             context,
-            'Could not open phone app. Please call: $phoneNumber',
+            'Could not open About Us. Please visit: $aboutUrl',
           );
         }
       }
@@ -448,7 +445,34 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
       if (mounted) {
         ErrorHandler.showError(
           context,
-          'Error opening phone: $e',
+          'Error opening About Us: $e',
+        );
+      }
+    }
+  }
+
+  Future<void> _openContactUs() async {
+    const contactUrl = 'https://khelset.com/contact/';
+    try {
+      final uri = Uri.parse(contactUrl);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        if (mounted) {
+          ErrorHandler.showError(
+            context,
+            'Could not open Contact Us. Please visit: $contactUrl',
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ErrorHandler.showError(
+          context,
+          'Error opening Contact Us: $e',
         );
       }
     }
@@ -688,19 +712,24 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
             runSpacing: 8,
             children: [
               _buildCompactButton(
+                icon: Icons.info_outline_rounded,
+                label: 'About Us',
+                onTap: _openAboutUs,
+              ),
+              _buildCompactButton(
+                icon: Icons.contact_page_outlined,
+                label: 'Contact Us',
+                onTap: _openContactUs,
+              ),
+              _buildCompactButton(
                 icon: Icons.privacy_tip_outlined,
                 label: 'Privacy Policy',
                 onTap: _openPrivacyPolicy,
               ),
               _buildCompactButton(
-                icon: Icons.email_outlined,
-                label: 'Email Support',
-                onTap: _contactEmailSupport,
-              ),
-              _buildCompactButton(
-                icon: Icons.phone_outlined,
-                label: 'Call Support',
-                onTap: _contactPhoneSupport,
+                icon: Icons.description_outlined,
+                label: 'Terms & Conditions',
+                onTap: _openTermsAndConditions,
               ),
             ],
           ),

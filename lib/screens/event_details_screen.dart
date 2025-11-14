@@ -32,8 +32,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> with SingleTick
   @override
   void initState() {
     super.initState();
-    // Initialize the TabController with 3 tabs: Fixtures, Teams, Info.
-    _tabController = TabController(length: 3, vsync: this);
+    // Initialize the TabController with 3 tabs and set initial tab to Fixtures (index 2).
+    _tabController = TabController(length: 3, vsync: this, initialIndex: 2);
     _fetchEventData();
   }
 

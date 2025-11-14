@@ -13,22 +13,10 @@ void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   
-  // Start timer to ensure minimum splash duration
-  final splashStartTime = DateTime.now();
-  
   // Wait for Firebase to initialize.
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
-  // Calculate remaining time to reach minimum splash duration (500ms)
-  final elapsedTime = DateTime.now().difference(splashStartTime).inMilliseconds;
-  final remainingTime = 500 - elapsedTime;
-  
-  // Wait for remaining time if initialization was too fast
-  if (remainingTime > 0) {
-    await Future.delayed(Duration(milliseconds: remainingTime));
-  }
   
   // Set status bar and navigation bar colors
   SystemChrome.setSystemUIOverlayStyle(
