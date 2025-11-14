@@ -313,6 +313,64 @@
             font-size: 1.5em;
         }
 
+        .squads-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .squad-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid #3498db;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .squad-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .squad-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.4em;
+            text-align: center;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+
+        .squad-card .captain {
+            text-align: center;
+            color: #e74c3c;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.05em;
+        }
+
+        .player-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .player-list li {
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-size: 0.95em;
+            color: #34495e;
+            transition: background 0.2s;
+        }
+
+        .player-list li:hover {
+            background: #e8f4f8;
+        }
+
         .ad-section {
             margin: 50px 0;
             text-align: center;
@@ -427,6 +485,217 @@
 
     <div class="container">
 
+        <div class="ad-section">
+            <!-- AdSense Ad Placement - Top of Content -->
+            <p class="ad-text">Advertisement</p>
+        </div>
+
+        <h2>👥 Team Squads - NPL Season 2</h2>
+        <p style="text-align: center;">Complete squad lists for all eight participating teams in Nepal Premier League Season 2.</p>
+
+        <div class="squads-grid">
+            <!-- Biratnagar Kings -->
+            <div class="squad-card">
+                <h3>⚔️ Biratnagar Kings</h3>
+                <p class="captain">Captain: Sandeep Lamichhane</p>
+                <ul class="player-list">
+                    <li>Sandeep Lamichhane (c)</li>
+                    <li>Basir Ahamad</li>
+                    <li>Lokesh Bam (wk)</li>
+                    <li>Subash Bhandari</li>
+                    <li>Naren Bhatta</li>
+                    <li>Marchant de Lange</li>
+                    <li>Faf du Plessis</li>
+                    <li>Martin Guptill</li>
+                    <li>Pratish GC</li>
+                    <li>Sam Heazlett</li>
+                    <li>Narayan Joshi</li>
+                    <li>Shrawan Kisku</li>
+                    <li>George Munsey</li>
+                    <li>Sahil Patel (wk)</li>
+                    <li>Shankar Rana</li>
+                    <li>Shubham Ranjane</li>
+                    <li>Surya Tamang</li>
+                </ul>
+            </div>
+
+            <!-- Chitwan Rhinos -->
+            <div class="squad-card">
+                <h3>🦏 Chitwan Rhinos</h3>
+                <p class="captain">Captain: Kushal Malla</p>
+                <ul class="player-list">
+                    <li>Kushal Malla (c)</li>
+                    <li>Bipin Acharya</li>
+                    <li>Kamal Singh Airee</li>
+                    <li>Deepak Bohara</li>
+                    <li>Ravi Bopara</li>
+                    <li>Rijan Dhakal</li>
+                    <li>Saugat Dhakal</li>
+                    <li>Gautam KC</li>
+                    <li>Dev Khanal</li>
+                    <li>Ranjeet Kumar</li>
+                    <li>Dawid Malan</li>
+                    <li>Alpesh Ramjani</li>
+                    <li>Amar Rautela</li>
+                    <li>Bipin Rawal (wk)</li>
+                    <li>Arjun Saud (wk)</li>
+                    <li>Sohail Tanvir</li>
+                    <li>Saif Zaib</li>
+                </ul>
+            </div>
+
+            <!-- Janakpur Bolts -->
+            <div class="squad-card">
+                <h3>⚡ Janakpur Bolts</h3>
+                <p class="captain">Captain: Anil Sah</p>
+                <ul class="player-list">
+                    <li>Anil Sah (c, wk)</li>
+                    <li>Bikash Aagri</li>
+                    <li>Sachin Bhatta</li>
+                    <li>Shubh Kansakar</li>
+                    <li>Sanjay Krishnamurthi</li>
+                    <li>Nicol Loftie-Eaton</li>
+                    <li>Aaditya Mahata</li>
+                    <li>Kishore Mahato</li>
+                    <li>Lahiru Milantha (wk)</li>
+                    <li>Wayne Parnell</li>
+                    <li>Lalit Rajbanshi</li>
+                    <li>Aasif Sheikh (wk)</li>
+                    <li>Rupesh Singh</li>
+                    <li>Imran Tahir</li>
+                    <li>Tul Bahadur Thapa</li>
+                    <li>Mayan Yadav</li>
+                </ul>
+            </div>
+
+            <!-- Karnali Yaks -->
+            <div class="squad-card">
+                <h3>🦌 Karnali Yaks</h3>
+                <p class="captain">Captain: Sompal Kami</p>
+                <ul class="player-list">
+                    <li>Sompal Kami (c)</li>
+                    <li>Will Bosisto</li>
+                    <li>Deepak Dumre (wk)</li>
+                    <li>Arjun Gharti (wk)</li>
+                    <li>Gulshan Jha</li>
+                    <li>Yuvraj Khatri</li>
+                    <li>Jaykishan Kolsawala (wk)</li>
+                    <li>Max O'Dowd</li>
+                    <li>Priyank Panchal</li>
+                    <li>Dipendra Rawat</li>
+                    <li>Pawan Sarraf</li>
+                    <li>Bipin Sharma</li>
+                    <li>Imran Sheikh</li>
+                    <li>Unish Thakuri</li>
+                    <li>Mark Watt</li>
+                    <li>Nandan Yadav</li>
+                    <li>Najibullah Zadran</li>
+                </ul>
+            </div>
+
+            <!-- Kathmandu Gurkhas -->
+            <div class="squad-card">
+                <h3>🗡️ Kathmandu Gurkhas</h3>
+                <p class="captain">Captain: Karan KC</p>
+                <ul class="player-list">
+                    <li>Karan KC (c)</li>
+                    <li>Mohammad Aadil Alam</li>
+                    <li>Shahab Alam</li>
+                    <li>Ben Charlesworth</li>
+                    <li>Gerhard Erasmus</li>
+                    <li>Dipesh Kandel</li>
+                    <li>Milind Kumar</li>
+                    <li>Rashid Khan</li>
+                    <li>Uttam Magar (wk)</li>
+                    <li>Sunny Patel</li>
+                    <li>Natarajan Shah</li>
+                    <li>Bhim Sharki</li>
+                    <li>John Simpson (wk)</li>
+                    <li>Pratik Shrestha</li>
+                    <li>Aakash Tripathi</li>
+                    <li>Tul B Thapa</li>
+                    <li>Ricardo Vasconcelos (wk)</li>
+                    <li>Santosh Yadav</li>
+                </ul>
+            </div>
+
+            <!-- Lumbini Lions -->
+            <div class="squad-card">
+                <h3>🦁 Lumbini Lions</h3>
+                <p class="captain">Captain: Rohit Paudel</p>
+                <ul class="player-list">
+                    <li>Rohit Paudel (c)</li>
+                    <li>Dinesh Adhikari</li>
+                    <li>Sameer Ali</li>
+                    <li>Tilak Bhandari</li>
+                    <li>Thomas Draca</li>
+                    <li>Abhishesh Gautam</li>
+                    <li>Durgesh Gupta</li>
+                    <li>Sundeep Jora</li>
+                    <li>Aadil Khan</li>
+                    <li>Sumit Maharjan</li>
+                    <li>Sher Malla</li>
+                    <li>Gulbadin Naib</li>
+                    <li>Dilip Nath (wk)</li>
+                    <li>Bishal Patel</li>
+                    <li>D'Arcy Short</li>
+                    <li>Bibek Yadav</li>
+                </ul>
+            </div>
+
+            <!-- Pokhara Avengers -->
+            <div class="squad-card">
+                <h3>🏔️ Pokhara Avengers</h3>
+                <p class="captain">Captain: Kushal Bhurtel</p>
+                <ul class="player-list">
+                    <li>Kushal Bhurtel (c)</li>
+                    <li>Aakash Chand</li>
+                    <li>Sandeep Chhetri</li>
+                    <li>Trit Raj Das</li>
+                    <li>Dan Douthwaite</li>
+                    <li>Sagar Dhakal</li>
+                    <li>Dinesh Kharel</li>
+                    <li>Bipin Khatri</li>
+                    <li>Arjun Kumal</li>
+                    <li>James Neesham</li>
+                    <li>Krishna Poudel</li>
+                    <li>Raymon Reifer</li>
+                    <li>Adam Rossington (wk)</li>
+                    <li>Kiran Thagunna</li>
+                    <li>Abhisekh Tiwari</li>
+                </ul>
+            </div>
+
+            <!-- Sudurpaschim Royals -->
+            <div class="squad-card">
+                <h3>👑 Sudurpaschim Royals</h3>
+                <p class="captain">Captain: Dipendra Singh Airee</p>
+                <ul class="player-list">
+                    <li>Dipendra Singh Airee (c)</li>
+                    <li>Binod Bhandari (wk)</li>
+                    <li>Abinash Bohara</li>
+                    <li>Dipak Bohara (wk)</li>
+                    <li>Milan Bohara</li>
+                    <li>Josh Brown</li>
+                    <li>Hemant Dhami</li>
+                    <li>Scott Kuggeleijn</li>
+                    <li>Chris Lynn</li>
+                    <li>Hikmat Mahara</li>
+                    <li>Ishan Pandey</li>
+                    <li>Tek Rawat (wk)</li>
+                    <li>Naren Saud</li>
+                    <li>Harmeet Singh</li>
+                    <li>Aarif Sheikh</li>
+                    <li>Dipendra Thapa (wk)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="ad-section">
+            <!-- AdSense Ad Placement - After Squads -->
+            <p class="ad-text">Advertisement</p>
+        </div>
+
         <p>
             Welcome to the official home for the <strong>Nepal Premier League (NPL) Season 2</strong>! As the premier T20 cricket tournament in Nepal, the NPL brings together the nation's top talent and rising stars for intense competition. This page serves as your comprehensive guide for the 2025 season, covering every aspect of the league.
         </p>
@@ -456,6 +725,59 @@
             <div class="team-card">Pokhara Avengers</div>
             <div class="team-card">Sudurpaschim Royals</div>
         </div>
+
+        <h3 style="text-align: center; margin-top: 40px; color: #2c3e50;">Team Captains & Head Coaches</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Team</th>
+                    <th>Captain</th>
+                    <th>Head Coach</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Biratnagar Kings</td>
+                    <td>Sandeep Lamichhane</td>
+                    <td>Pubudu Dassanayake</td>
+                </tr>
+                <tr>
+                    <td>Chitwan Rhinos</td>
+                    <td>Kushal Malla</td>
+                    <td>Kalam Ali</td>
+                </tr>
+                <tr>
+                    <td>Janakpur Bolts</td>
+                    <td>Anil Sah</td>
+                    <td>Shivnarine Chanderpaul</td>
+                </tr>
+                <tr>
+                    <td>Karnali Yaks</td>
+                    <td>Sompal Kami</td>
+                    <td>Gyanendra Malla</td>
+                </tr>
+                <tr>
+                    <td>Kathmandu Gurkhas</td>
+                    <td>Karan KC</td>
+                    <td>Monty Desai</td>
+                </tr>
+                <tr>
+                    <td>Lumbini Lions</td>
+                    <td>Rohit Paudel</td>
+                    <td>Tinu Yohannan</td>
+                </tr>
+                <tr>
+                    <td>Pokhara Avengers</td>
+                    <td>Kushal Bhurtel</td>
+                    <td>Rajiv Kumar</td>
+                </tr>
+                <tr>
+                    <td>Sudurpaschim Royals</td>
+                    <td>Dipendra Singh Airee</td>
+                    <td>Jagat Tamata</td>
+                </tr>
+            </tbody>
+        </table>
 
         <h2>📅 NPL Season 2 Full Fixtures & Schedule</h2>
         <p>Below is the full official schedule for NPL Season 2, including dates, matchups, and venues.</p>
@@ -556,7 +878,7 @@
             </tbody>
         </table>
 
-        <div class="ad-section">
+    <div class="ad-section">
             <!-- AdSense Ad Placement -->
             <p class="ad-text">Advertisement</p>
         </div>
