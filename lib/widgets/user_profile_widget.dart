@@ -371,7 +371,7 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
   }
 
   Future<void> _openPrivacyPolicy() async {
-    const privacyPolicyUrl = 'https://khelset.com/privacy-policy/';
+    const privacyPolicyUrl = 'https://khelset.com/privacy-policy';
     try {
       final uri = Uri.parse(privacyPolicyUrl);
       if (await canLaunchUrl(uri)) {
@@ -398,7 +398,7 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
   }
 
   Future<void> _openTermsAndConditions() async {
-    const termsUrl = 'https://khelset.com/terms/';
+    const termsUrl = 'https://khelset.com/terms';
     try {
       final uri = Uri.parse(termsUrl);
       if (await canLaunchUrl(uri)) {
@@ -425,7 +425,7 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
   }
 
   Future<void> _openAboutUs() async {
-    const aboutUrl = 'https://khelset.com/about/';
+    const aboutUrl = 'https://khelset.com/about';
     try {
       final uri = Uri.parse(aboutUrl);
       if (await canLaunchUrl(uri)) {
@@ -452,7 +452,7 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
   }
 
   Future<void> _openContactUs() async {
-    const contactUrl = 'https://khelset.com/contact/';
+    const contactUrl = 'https://khelset.com/contact';
     try {
       final uri = Uri.parse(contactUrl);
       if (await canLaunchUrl(uri)) {

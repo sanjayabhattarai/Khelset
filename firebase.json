@@ -10,7 +10,57 @@
       "**/.*",
       "**/node_modules/**"
     ],
+    "cleanUrls": true,
+    "trailingSlash": false,
     "rewrites": [
+      {
+        "source": "/home/**",
+        "destination": "/home/index.html"
+      },
+      {
+        "source": "/home",
+        "destination": "/home/index.html"
+      },
+      {
+        "source": "/about/**",
+        "destination": "/about/index.html"
+      },
+      {
+        "source": "/about",
+        "destination": "/about/index.html"
+      },
+      {
+        "source": "/contact/**",
+        "destination": "/contact/index.html"
+      },
+      {
+        "source": "/contact",
+        "destination": "/contact/index.html"
+      },
+      {
+        "source": "/nplseason2/**",
+        "destination": "/nplseason2/index.html"
+      },
+      {
+        "source": "/nplseason2",
+        "destination": "/nplseason2/index.html"
+      },
+      {
+        "source": "/privacy-policy/**",
+        "destination": "/privacy-policy/index.html"
+      },
+      {
+        "source": "/privacy-policy",
+        "destination": "/privacy-policy/index.html"
+      },
+      {
+        "source": "/terms/**",
+        "destination": "/terms/index.html"
+      },
+      {
+        "source": "/terms",
+        "destination": "/terms/index.html"
+      },
       {
         "source": "**",
         "destination": "/index.html"
